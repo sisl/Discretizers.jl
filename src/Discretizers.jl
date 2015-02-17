@@ -2,6 +2,8 @@ module Discretizers
 
 # using DataArrays
 
+import Base: extrema
+
 export
     # generic types
     AbstractDiscretizer,
@@ -23,6 +25,10 @@ export
     supports_encoding,  # whether discretizer supports encoding given type or variable
     supports_decoding,  # whether discretizer supports decoding given type or variable
     binedges,           # compute bin edges using a discretization algorithm
+
+    # linear discretizer
+    extrema,            # (min,max) for bin or for entire set
+    bincenters,         # Vector{Float64} list of bin centers
 
     # reexport
     NA,

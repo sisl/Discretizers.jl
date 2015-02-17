@@ -28,14 +28,22 @@ end
 
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = cd.n2d[x]::D
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.n2d[convert(N,x)]::D
-encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray) = 
-    reshape(D[encode(cd, x) for x in data], size(data))
+function encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray)
+    arr = Array(D, length(data))
+    for (i,x) in enumerate(data)
+        arr[i] = encode(cd, x)
+    end
+    reshape(arr, size(data))
+end
 
 decode{N,D}(cd::CategoricalDiscretizer{N,D}, x::D) = cd.d2n[x]::N
 decode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.d2n[convert(D,x)]::N
-decode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D}) = 
-    reshape(N[decode(cd, x) for x in data], size(data))
-decode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray) = 
-    reshape(N[decode(cd, x) for x in data], size(data))
+function decode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D})
+    arr = Array(N, length(data))
+    for (i,d) in enumerate(data)
+        arr[i] = decode(cd, d)
+    end
+    reshape(arr, size(data))
+end
 
 nlabels(cd::CategoricalDiscretizer) = length(cd.n2d)

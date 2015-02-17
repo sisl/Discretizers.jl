@@ -7,6 +7,7 @@
 # handle NA
 # handle Nullable
 # specify how to handle NaN
+# ability to specify decoding behavior
 
 const DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST = true
 
@@ -22,7 +23,7 @@ function LinearDiscretizer{N<:Real, D}( binedges::Vector{N}, i2d::Dict{Int,D};
     force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST )
 
     length(binedges) > 1 || error("bin edges must contain at least 2 values")
-    findfirst(i->binedges[i-1] > binedges[i], [2:length(binedges)]) == 0 || 
+    findfirst(i->binedges[i-1] >= binedges[i], [2:length(binedges)]) == 0 || 
         error("Bin edges must be sorted in increasing order")
     for i = 1 : length(binedges)-1
         haskey(i2d, i) || error("i2d must contain all necessary keys")
@@ -82,32 +83,68 @@ function encode{N,D}(ld::LinearDiscretizer{N,D}, x::N)
     return a
 end
 encode{N,D}(ld::LinearDiscretizer{N,D}, x) = encode(ld, convert(N, x))::D
-encode{N,D}(ld::LinearDiscretizer{N,D}, data::AbstractArray) = 
-    reshape(D[encode(ld, x) for x in data], size(data))
+function encode{N,D}(ld::LinearDiscretizer{N,D}, data::AbstractArray)
+    arr = Array(D, length(data))
+    for (i,x) in enumerate(data)
+        arr[i] = encode(ld, x)
+    end
+    reshape(arr, size(data))
+end
 
-# function decode{N,D}(ld::LinearDiscretizer{N,D}, x::S)
-#     ind = ld.d2i[x]
-#     lo  = ld.binedges[ind]
-#     hi  = ld.binedges[ind+1]
+function decode{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}, d::D)
+    ind = ld.d2i[d]
+    lo  = ld.binedges[ind]
+    hi  = ld.binedges[ind+1]
+    lo + rand(N)*(hi-lo)
+end
+function decode{N<:Integer,D}(ld::LinearDiscretizer{N,D}, d::D)
+    ind = ld.d2i[d]
+    lo  = ld.binedges[ind]
+    hi  = ld.binedges[ind+1]
+    if hi != ld.binedges[end]
+        rand(lo:hi-1)
+    else
+        rand(lo:hi)
+    end
+end
+decode{N,D}(ld::LinearDiscretizer{N,D}, d) = decode(ld, convert(D,d))::N
+function decode{N,D}(ld::LinearDiscretizer{N,D}, data::AbstractArray{D})
+    arr = Array(N, length(data))
+    for (i,d) in enumerate(data)
+        arr[i] = decode(ld, d)
+    end
+    reshape(arr, size(data))
+end
 
-#     if ld.zero_bin && lo <= 0 <= hi
-#         0.0
-#     else
-#         rand(T)*(hi-lo) + lo
-#     end
-# end
-# decode{N,D}(ld::LinearDiscretizer{N,D}, x) = decode(ld, convert(S,x))::T
-# decode{N,D}(ld::LinearDiscretizer{N,D}, data::AbstractArray{S}) = 
-#     reshape(T[decode(ld, x) for x in data], size(data))
-# decode{N,D}(ld::LinearDiscretizer{N,D}, data::DataArray{S}) = 
-#     reshape(T[decode(ld, x) for x in data], size(data))
+function extrema{N,D}(ld::LinearDiscretizer{N,D})
+    lo  = ld.binedges[1]
+    hi  = ld.binedges[end]
+    (lo, hi)
+end
+function extrema{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}, d::D)
+    ind = ld.d2i[d]
+    lo  = ld.binedges[ind]
+    hi  = ld.binedges[ind+1]
+    (lo, hi)
+end
+function extrema{N<:Integer,D}(ld::LinearDiscretizer{N,D}, d::D)
+    ind = ld.d2i[d]
+    lo  = ld.binedges[ind]
+    hi  = ld.binedges[ind+1]
+    if hi  == ld.binedges[end]
+        (lo, hi)
+    else
+        (lo, hi-1)
+    end
+end
 
-# function bin_bounds{N,D}(ld::LinearDiscretizer{N,D}, x::S)
-#     ind = ld.d2i[x]
-#     lo  = ld.binedges[ind]
-#     hi  = ld.binedges[ind+1]
-#     (lo, hi)
-# end
-# bin_centers(ld::LinearDiscretizer) = 0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end])
-
-# nlabels(ld::LinearDiscretizer) = ld.nbins
+nlabels(ld::LinearDiscretizer) = ld.nbins
+bincenters{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
+function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
+    retval = Array(Float64, ld.nbins)
+    for i = 1 : length(retval)-1
+        retval[i] = 0.5(ld.binedges[i+1]-1 + ld.binedges[i])
+    end
+    retval[end] = 0.5(ld.binedges[end] + ld.binedges[end-1])
+    retval
+end
