@@ -1,6 +1,6 @@
 module Discretizers
 
-using DataArrays
+# using DataArrays
 
 export
     # generic types
@@ -23,6 +23,10 @@ export
     supports_encoding,  # whether discretizer supports encoding given type or variable
     supports_decoding,  # whether discretizer supports decoding given type or variable
     binedges,           # compute bin edges using a discretization algorithm
+
+    # reexport
+    NA,
+    DataArray
 
 ### source files
 
