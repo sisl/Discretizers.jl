@@ -24,5 +24,9 @@ end
 
 
 
+
+
 include("test_categorical_discretizer.jl")
 include("test_linear_discretizer.jl")
+
+include("test_disc_uniformwidth.jl")

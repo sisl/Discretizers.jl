@@ -40,6 +40,7 @@ include("common.jl")
 
 include("categorical_discretizer.jl")
 include("linear_discretizer.jl")
+include("disc_uniformwidth.jl")
 
 
 end # module
