@@ -1,6 +1,7 @@
-using Base.Test
 
-include("disc_MODL.jl")
+optimal = DiscretizeMODL_Optimal()
+greedy  = DiscretizeMODL_Greedy()
+post_greedy = DiscretizeMODL_PostGreedy()
 
 # Case1
 continuous = [1.0]; class_value = [1];
@@ -43,9 +44,12 @@ end
 @test binedges(optimal,continuous,class_value)     == [1.0,20.5,40.5,60.5,80.5,100.0]
 @test binedges(greedy,continuous,class_value)      == [1.0,20.5,40.5,60.5,80.5,100.0]
 @test binedges(post_greedy,continuous,class_value) == [1.0,20.5,40.5,60.5,80.5,100.0]
-@test binedges(post_greedy,continuous,class_value,2) == [1.0,40.5,100.0]
-@test binedges(post_greedy,continuous,class_value,3) == [1.0,40.5,80.5,100.0]
-@test binedges(post_greedy,continuous,class_value,4) == [1.0,20.5,40.5,60.5,100.0]
+post_greedy.max_bin_count = 2
+@test binedges(post_greedy,continuous,class_value) == [1.0,40.5,100.0]
+post_greedy.max_bin_count = 3
+@test binedges(post_greedy,continuous,class_value) == [1.0,40.5,80.5,100.0]
+post_greedy.max_bin_count = 4
+@test binedges(post_greedy,continuous,class_value) == [1.0,20.5,40.5,60.5,100.0]
 
 #Case7
 continuous = [1.0:1.0:100.0];
@@ -57,8 +61,13 @@ class_value = [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,
 
 @test binedges(optimal,continuous,class_value)     == [1.0,12.5,38.5,57.5,72.5,76.5,100.0]
 @test binedges(greedy,continuous,class_value)      == [1.0,12.5,38.5,60.5,72.5,76.5,100.0]
+post_greedy.max_bin_count = 0
 @test binedges(post_greedy,continuous,class_value) == [1.0,12.5,38.5,57.5,72.5,76.5,100.0]
-@test binedges(post_greedy,continuous,class_value,2) == [1.0,76.5,100.0]
-@test binedges(post_greedy,continuous,class_value,3) == [1.0,12.5,76.5,100.0]
-@test binedges(post_greedy,continuous,class_value,4) == [1.0,12.5,38.5,76.5,100.0]
-@test binedges(post_greedy,continuous,class_value,5) == [1.0,12.5,38.5,57.5,76.5,100.0]
+post_greedy.max_bin_count = 2
+@test binedges(post_greedy,continuous,class_value) == [1.0,76.5,100.0]
+post_greedy.max_bin_count = 3
+@test binedges(post_greedy,continuous,class_value) == [1.0,12.5,76.5,100.0]
+post_greedy.max_bin_count = 4
+@test binedges(post_greedy,continuous,class_value) == [1.0,12.5,38.5,76.5,100.0]
+post_greedy.max_bin_count = 5
+@test binedges(post_greedy,continuous,class_value) == [1.0,12.5,38.5,57.5,76.5,100.0]
