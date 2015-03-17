@@ -16,7 +16,9 @@ export
     # discretization algorithms
     DiscretizeUniformWidth,
     DiscretizeUniformCount,
-    DiscretizeMODL,
+    DiscretizeMODL_Optimal,
+    DiscretizeMODL_Greedy,
+    DiscretizeMODL_PostGreedy,
 
     # methods
     encode,             # map from natural to discretized state
