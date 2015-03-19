@@ -5,4 +5,4 @@
 
 This package supports discretization methods and mapping functions.
 
-Read the [documentation](http://nbviewer.ipython.org/github/sisl/Discretizers.jl/blob/master/doc/Discretizers.ipynb).
+Please read the [documentation](http://nbviewer.ipython.org/github/sisl/Discretizers.jl/blob/master/doc/Discretizers.ipynb).
