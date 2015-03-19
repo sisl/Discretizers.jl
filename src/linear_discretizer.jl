@@ -66,13 +66,13 @@ function encode{N,D}(ld::LinearDiscretizer{N,D}, x::N)
     a, b = 1, length(binedges)
     va, vb = binedges[a], binedges[b]
     if isapprox(vb, x)
-        return b-1
+        return ld.i2d[b-1]
     end
     while b-a > 1
         c = div(a+b, 2)
         vc = binedges[c]
         if isapprox(x, vc)
-            return c
+            return ld.i2d[c]
         end
         if x < vc
             b, vb = c, vc
@@ -80,7 +80,7 @@ function encode{N,D}(ld::LinearDiscretizer{N,D}, x::N)
             a, va = c, vc
         end
     end
-    return a
+    return ld.i2d[a]
 end
 encode{N,D}(ld::LinearDiscretizer{N,D}, x) = encode(ld, convert(N, x))::D
 function encode{N,D}(ld::LinearDiscretizer{N,D}, data::AbstractArray)
