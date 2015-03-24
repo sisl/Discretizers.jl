@@ -23,9 +23,9 @@ function array_matches{S<:Real, T<:Real}(arr::AbstractVector{S}, arr2::AbstractV
 end
 
 
-# include("test_categorical_discretizer.jl")
-# include("test_linear_discretizer.jl")
+include("test_categorical_discretizer.jl")
+include("test_linear_discretizer.jl")
 
 include("test_disc_uniformwidth.jl")
 include("test_disc_uniformcount.jl")
-# include("test_disc_MODL.jl")
+include("test_disc_MODL.jl")
