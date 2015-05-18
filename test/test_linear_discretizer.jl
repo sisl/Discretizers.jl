@@ -1,5 +1,4 @@
 
-LinearDiscretizer([0.0,0.5,1.0], [1=>:A, 2=>:B])
 LinearDiscretizer([0.0,0.5,1.0], Uint8)
 @test_throws ErrorException LinearDiscretizer([0.0])
 @test_throws ErrorException LinearDiscretizer([0.5,0.0])
@@ -24,6 +23,13 @@ ld = LinearDiscretizer([0.0,0.5,1.0])
 
 @test 0.0 ≤ decode(ld, 1) ≤ 0.5
 @test 0.5 ≤ decode(ld, 2) ≤ 1.0
+@test 0.0 ≤ decode(ld, 1, SAMPLE_UNIFORM) ≤ 0.5
+@test 0.5 ≤ decode(ld, 2, SAMPLE_UNIFORM) ≤ 1.0
+@test isapprox(decode(ld, 1, SAMPLE_BIN_CENTER), 0.25)
+@test isapprox(decode(ld, 2, SAMPLE_BIN_CENTER), 0.75)
+@test isapprox(decode(ld, 1, SAMPLE_UNIFORM_ZERO_BIN), 0.0)
+@test 0.5 ≤ decode(ld, 2, SAMPLE_UNIFORM_ZERO_BIN) ≤ 1.0
+
 @test_throws KeyError decode(ld,  0)
 @test_throws KeyError decode(ld,  3)
 @test 0.5 ≤ decode(ld, uint8(2)) ≤ 1.0
@@ -58,6 +64,13 @@ ld = LinearDiscretizer([0,10,20])
 
 @test  0 ≤ decode(ld, 1) < 10
 @test 10 ≤ decode(ld, 2) ≤ 20
+@test  0 ≤ decode(ld, 1, SAMPLE_UNIFORM) < 10
+@test 10 ≤ decode(ld, 2, SAMPLE_UNIFORM) ≤ 20
+@test decode(ld, 1, SAMPLE_BIN_CENTER) == 5
+@test decode(ld, 2, SAMPLE_BIN_CENTER) == 15
+@test decode(ld, 1, SAMPLE_UNIFORM_ZERO_BIN) == 0
+@test 10 ≤ decode(ld, 2, SAMPLE_UNIFORM_ZERO_BIN) ≤ 20
+
 @test_throws KeyError decode(ld,  0)
 @test_throws KeyError decode(ld,  3)
 @test 10 ≤ decode(ld, uint8(2)) ≤ 20
