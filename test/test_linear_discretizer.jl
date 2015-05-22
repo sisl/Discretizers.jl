@@ -46,6 +46,34 @@ mat = decode(ld, [2 1; 1 2])
 @test nlabels(ld) == 2
 @test array_matches(bincenters(ld), [0.25,0.75], 1e-8)
 
+@test encoded_type(ld) == Int
+@test decoded_type(ld) == Float64
+@test encoded_type(ld) != Float64
+@test decoded_type(ld) != Int
+
+@test supports_encoding(ld, 0.0)
+@test supports_encoding(ld, 0.5)
+@test supports_encoding(ld, 1.0)
+@test supports_encoding(ld, 0.25)
+@test supports_encoding(ld, 0.75)
+@test supports_encoding(ld, -0.1)
+@test supports_encoding(ld, 1.1)
+
+@test supports_decoding(ld, 1)
+@test supports_decoding(ld, 2)
+@test !supports_decoding(ld, 0)
+@test !supports_decoding(ld, 3)
+
+ld = LinearDiscretizer([0.0,0.5,1.0], Int, force_outliers_to_closest=false)
+@test supports_encoding(ld, 0.0)
+@test supports_encoding(ld, 0.5)
+@test supports_encoding(ld, 1.0)
+@test supports_encoding(ld, 0.25)
+@test supports_encoding(ld, 0.75)
+@test !supports_encoding(ld, -0.1)
+@test !supports_encoding(ld, 1.1)
+@test !supports_encoding(ld, Inf)
+
 ############################################################
 
 ld = LinearDiscretizer([0,10,20])
@@ -86,3 +114,30 @@ mat = decode(ld, [2 1; 1 2])
 
 @test nlabels(ld) == 2
 @test array_matches(bincenters(ld), [4.5,15], 1e-8)
+
+@test encoded_type(ld) == Int
+@test decoded_type(ld) == Int
+@test encoded_type(ld) != Float64
+@test decoded_type(ld) != Float64
+
+@test supports_encoding(ld, 0)
+@test supports_encoding(ld, 10)
+@test supports_encoding(ld, 20)
+@test supports_encoding(ld, 4)
+@test supports_encoding(ld, 16)
+@test supports_encoding(ld, -1)
+@test supports_encoding(ld, 21)
+
+@test supports_decoding(ld, 1)
+@test supports_decoding(ld, 2)
+@test !supports_decoding(ld, 0)
+@test !supports_decoding(ld, 3)
+
+ld = LinearDiscretizer([0,10,20], Int, force_outliers_to_closest=false)
+@test supports_encoding(ld, 0)
+@test supports_encoding(ld, 10)
+@test supports_encoding(ld, 20)
+@test supports_encoding(ld, 4)
+@test supports_encoding(ld, 16)
+@test !supports_encoding(ld, -1)
+@test !supports_encoding(ld, 21)
