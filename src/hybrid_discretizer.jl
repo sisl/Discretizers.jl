@@ -13,10 +13,10 @@ function datalineardiscretizer{D<:Integer}(binedges::Vector{Float64}, ::Type{D}=
 end
 
 function supports_encoding{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, x::N)
-    if haskey(disc.cat.n2d, x) || disc.force_outliers_to_closest
+    if haskey(disc.cat.n2d, x) || disc.lin.force_outliers_to_closest
         return true
     else
-        return disc.binedges[1] ≤ x ≤ disc.binedges[end]
+        return disc.lin.binedges[1] ≤ x ≤ disc.lin.binedges[end]
     end
 end
 supports_decoding{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, d::D) = 1 ≤ d ≤ nlabels(disc)

@@ -119,7 +119,7 @@ function decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, :
     hi  = ld.binedges[ind+1]
 
     if lo ≤ 0.0 ≤ hi
-        return 0.0
+        return zero(N)
     end
     return convert(N, lo + rand()*(hi-lo))
 end
