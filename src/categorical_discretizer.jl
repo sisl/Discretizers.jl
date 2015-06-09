@@ -26,6 +26,9 @@ function CategoricalDiscretizer{N, D<:Integer}(data::AbstractArray{N}, ::Type{D}
     CategoricalDiscretizer(n2d)
 end
 
+supports_encoding{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = haskey(cd.n2d, x)
+supports_decoding{N,D}(cd::CategoricalDiscretizer{N,D}, d::D) = 1 ≤ d ≤ nlabels(cd)
+
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = cd.n2d[x]::D
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.n2d[convert(N,x)]::D
 function encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray)

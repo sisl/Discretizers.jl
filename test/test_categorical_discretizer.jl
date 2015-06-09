@@ -8,7 +8,6 @@ for cd in (
     @test encode(cd, "B") == 2
     @test encode(cd, [:C, :B, :A, :B, :C]) == [3,2,1,2,3]
     @test encode(cd, [:A :B; :C :A]) == [1 2; 3 1]
-    # @test encode(cd, DataArray([:C, :B])) == [3,2]
     @test_throws KeyError encode(cd, :D)
     @test_throws KeyError encode(cd, [:A, :D])
 
@@ -16,11 +15,19 @@ for cd in (
     @test decode(cd, uint8(2)) == :B
     @test decode(cd, [3,2,1,2,3]) == [:C, :B, :A, :B, :C]
     @test decode(cd, [1 2; 3 1]) == [:A :B; :C :A]
-    # @test decode(cd, [3,2]) == DataArray([:C, :B])
 
     @test nlabels(cd) == 3
-    @test supports_encoding(cd, Symbol)
+    @test encoded_type(cd) == Int
+    @test decoded_type(cd) == Symbol
+
     @test supports_encoding(cd, :A)
-    @test supports_decoding(cd, Int)
+    @test supports_encoding(cd, :B)
+    @test supports_encoding(cd, :C)
+    @test !supports_encoding(cd, :D)
+
     @test supports_decoding(cd, 1)
+    @test supports_decoding(cd, 2)
+    @test supports_decoding(cd, 3)
+    @test !supports_decoding(cd, 0)
+    @test !supports_decoding(cd, 4)
 end

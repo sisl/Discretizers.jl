@@ -3,14 +3,11 @@
 # AbstractDiscretizer
 
 abstract AbstractDiscretizer{N,D}
-    # N indicates the natural type
-    # D indicates the discrete type, typically an integer
+    # N indicates the decoded, or natural type
+    # D indicates the encoded, or discrete type
 
-supports_encoding{N,D}(::AbstractDiscretizer{N,D}, typ::Type) = typ <: N
-supports_encoding{N,D}(::AbstractDiscretizer{N,D}, x) = isa(x, N)
-
-supports_decoding{N,D}(::AbstractDiscretizer{N,D}, typ::Type) = typ <: D
-supports_decoding{N,D}(::AbstractDiscretizer{N,D}, x) = isa(x, D)
+encoded_type{N,D}(::AbstractDiscretizer{N,D}) = D
+decoded_type{N,D}(::AbstractDiscretizer{N,D}) = N
 
 
 # DiscretizationAlgorithm
