@@ -7,13 +7,14 @@ immutable HybridDiscretizer{N<:Real, D<:Integer} <: AbstractDiscretizer{N,D}
     lin :: LinearDiscretizer{N,D}
 end
 function datalineardiscretizer{D<:Integer}(binedges::Vector{Float64}, ::Type{D}=Int)
-    cat = CategoricalDiscretizer([Inf=>1])
-    lin = LinearDiscretizer(binedges, D)
-    HybridDiscretizer{Float64,D}(cat, lin)
+    categorical = CategoricalDiscretizer(@compat Dict{Float64, Int}(Inf=>1))
+    linear = LinearDiscretizer(binedges, D)
+    HybridDiscretizer{Float64,D}(categorical, linear)
 end
 
 function supports_encoding{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, x::N)
-    if haskey(disc.cat.n2d, x) || disc.lin.force_outliers_to_closest
+    if haskey(disc.cat.n2d, x) || 
+        (disc.lin.force_outliers_to_closest && !isnan(x))
         return true
     else
         return disc.lin.binedges[1] ≤ x ≤ disc.lin.binedges[end]
@@ -39,17 +40,17 @@ function encode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray)
 end
 
 function decode{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, d::D, method::AbstractSampleMethod=SAMPLE_UNIFORM)
-    if d < disc.lin.nbins
-        retval = decode(disc.lin)
+    if d ≤ disc.lin.nbins
+        retval = decode(disc.lin, d, method)
     else
-        retval = decode(disc.cat - disc.lin.nbins, method)
+        retval = decode(disc.cat,  d - disc.lin.nbins)
     end
     convert(N, retval)
 end
 decode{N<:Real,D<:Integer,E<:Integer}(disc::HybridDiscretizer{N,D}, d::E, method::AbstractSampleMethod=SAMPLE_UNIFORM) = 
     decode(disc, convert(D, d), method)
 
-function decode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray{D}, M::AbstractSampleMethod=SAMPLE_UNIFORM)
+function decode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
     arr = Array(N, length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(disc, d)
@@ -60,8 +61,8 @@ end
 Base.max(disc::HybridDiscretizer) = Base.max(disc.lin)
 Base.min(disc::HybridDiscretizer) = Base.min(disc.lin)
 extrema{N,D}(disc::HybridDiscretizer{N,D}) = extrema(disc.lin)
-extrema{N<:FloatingPoint,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin)
-extrema{N<:Integer,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin)
+extrema{N<:FloatingPoint,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin, d)
+extrema{N<:Integer,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin, d)
 totalwidth(disc::HybridDiscretizer) = totalwidth(disc.lin)
 
 nlabels(disc::HybridDiscretizer) = disc.lin.nbins + nlabels(disc.cat)

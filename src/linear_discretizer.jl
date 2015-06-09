@@ -130,29 +130,29 @@ function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::Sampl
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
     if hi != ld.binedges[end]
-        retval = rand(lo:hi-1)
+        retval = rand(lo:hi-1)::Int
     else
-        retval = rand(lo:hi)
+        retval = rand(lo:hi)::Int
     end
     convert(N, retval)
 end
 function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleBinCenter)
     ind = ld.d2i[d]
-    lo  = ld.binedges[ind]
-    hi  = ld.binedges[ind+1]
+    lo = ld.binedges[ind]
+    hi = ld.binedges[ind+1]
     convert(N, div(lo+hi,2))
 end
 function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniformZeroBin)
     ind = ld.d2i[d]
-    lo  = ld.binedges[ind]
-    hi  = ld.binedges[ind+1]
+    lo = int(ld.binedges[ind])
+    hi = int(ld.binedges[ind+1])
 
     if lo ≤ 0 ≤ hi
         retval = 0
     elseif hi != ld.binedges[end]
-        retval = rand(lo:hi-1)
+        retval = rand(lo:hi-1)::Int
     else
-        retval = rand(lo:hi)
+        retval = rand(lo:hi)::Int
     end
 
     convert(N, retval)
@@ -162,7 +162,7 @@ decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D) = decode(ld, d, 
 decode{N<:Real,D<:Integer,I<:Integer}(ld::LinearDiscretizer{N,D}, d::I, method::AbstractSampleMethod=SAMPLE_UNIFORM) =
     decode(ld, convert(D,d), method)
 
-function decode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, M::AbstractSampleMethod=SAMPLE_UNIFORM)
+function decode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
     arr = Array(N, length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(ld, d)

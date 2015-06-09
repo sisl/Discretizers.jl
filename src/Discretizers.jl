@@ -1,6 +1,6 @@
 module Discretizers
 
-# using DataArrays
+using Compat
 
 import Base: extrema
 
@@ -47,12 +47,7 @@ export
     # linear discretizer
     extrema,            # (min,max) for bin or for entire set
     totalwidth,         # total width of set, max-mina
-    bincenters,         # Vector{Float64} list of bin centers
-
-
-    # reexport
-    NA,
-    DataArray
+    bincenters         # Vector{Float64} list of bin centers
 
 ### source files
 

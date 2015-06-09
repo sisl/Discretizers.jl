@@ -17,7 +17,7 @@ end
 function CategoricalDiscretizer{N, D<:Integer}(data::AbstractArray{N}, ::Type{D}=Int)
     # build a label mapping N -> D <: Integer
     i = zero(D)
-    n2d = (N=>D)[]
+    n2d = @compat Dict{N, D}()
     for x in data
         if !haskey(n2d,x)
             n2d[x] = (i += 1)
