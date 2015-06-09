@@ -30,11 +30,7 @@ export
 
     # linear discretizer
     extrema,            # (min,max) for bin or for entire set
-    bincenters,         # Vector{Float64} list of bin centers
-
-    # reexport
-    NA,
-    DataArray
+    bincenters          # Vector{Float64} list of bin centers
 
 ### source files
 
