@@ -1,7 +1,7 @@
 using Base.Test
 using Lint
 
-# lintpkg( "Discretizers" )
+lintpkg( "Discretizers" )
 # @test isempty(lintpkg( "Discretizers", returnMsgs=true))
 
 ################
