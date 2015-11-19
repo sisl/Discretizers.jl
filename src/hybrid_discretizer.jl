@@ -13,7 +13,7 @@ function datalineardiscretizer{D<:Integer}(binedges::Vector{Float64}, ::Type{D}=
 end
 
 function supports_encoding{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, x::N)
-    if haskey(disc.cat.n2d, x) || 
+    if haskey(disc.cat.n2d, x) ||
         (disc.lin.force_outliers_to_closest && !isnan(x))
         return true
     else
@@ -23,7 +23,7 @@ end
 supports_decoding{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, d::D) = 1 ≤ d ≤ nlabels(disc)
 
 function encode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, x::N)
-    
+
     if haskey(disc.cat.n2d, x)
         return encode(disc.cat, x) + disc.lin.nbins
     end
@@ -47,7 +47,7 @@ function decode{N<:Real,D<:Integer}(disc::HybridDiscretizer{N,D}, d::D, method::
     end
     convert(N, retval)
 end
-decode{N<:Real,D<:Integer,E<:Integer}(disc::HybridDiscretizer{N,D}, d::E, method::AbstractSampleMethod=SAMPLE_UNIFORM) = 
+decode{N<:Real,D<:Integer,E<:Integer}(disc::HybridDiscretizer{N,D}, d::E, method::AbstractSampleMethod=SAMPLE_UNIFORM) =
     decode(disc, convert(D, d), method)
 
 function decode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
@@ -61,11 +61,11 @@ end
 Base.max(disc::HybridDiscretizer) = Base.max(disc.lin)
 Base.min(disc::HybridDiscretizer) = Base.min(disc.lin)
 extrema{N,D}(disc::HybridDiscretizer{N,D}) = extrema(disc.lin)
-extrema{N<:FloatingPoint,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin, d)
+extrema{N<:AbstractFloat,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin, d)
 extrema{N<:Integer,D}(disc::HybridDiscretizer{N,D}, d::D) = extrema(disc.lin, d)
 totalwidth(disc::HybridDiscretizer) = totalwidth(disc.lin)
 
 nlabels(disc::HybridDiscretizer) = disc.lin.nbins + nlabels(disc.cat)
 bincenters{N<:Real,D}(disc::HybridDiscretizer{N,D}) = bincenters(disc.lin)
-binwidth{N<:FloatingPoint,D}(disc::HybridDiscretizer{N,D}, d::D) = binwidth(disc.lin, d)
-binwidths{N<:FloatingPoint,D}(disc::HybridDiscretizer{N,D}) = binwidths(disc.lin)
+binwidth{N<:AbstractFloat,D}(disc::HybridDiscretizer{N,D}, d::D) = binwidth(disc.lin, d)
+binwidths{N<:AbstractFloat,D}(disc::HybridDiscretizer{N,D}) = binwidths(disc.lin)

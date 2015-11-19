@@ -6,7 +6,7 @@ immutable DiscretizeMODL_Optimal    <: DiscretizeMODL end
 immutable DiscretizeMODL_Greedy     <: DiscretizeMODL end
 type DiscretizeMODL_PostGreedy <: DiscretizeMODL
     max_bin_count :: Int
-    DiscretizeMODL_PostGreedy(max_bin_count::Integer = 0) = new(int(max_bin_count))
+    DiscretizeMODL_PostGreedy(max_bin_count::Integer = 0) = new(round(Int, max_bin_count))
 end
 
 function binedges{N<:Real, I<:Integer}(
@@ -23,104 +23,103 @@ function binedges{N<:Real, I<:Integer}(
         return optimal_result(data_continuous,data_class)
     elseif isa(alg, DiscretizeMODL_Greedy)
         return greedy_merge(data_continuous,data_class)
-    else 
+    else
         @assert(isa(alg, DiscretizeMODL_PostGreedy))
         return post_greedy_result(data_continuous,data_class,alg.max_bin_count)
     end
 end
 
-function MODL_value2_oneintval{T<:FloatingPoint, S<:Integer}(
-        continuous_ij  :: AbstractArray{T},
-        class_value_ij :: AbstractArray{S},
-        class_uniq     :: AbstractArray{S})
+function MODL_value2_oneintval{T<:AbstractFloat, S<:Integer}(
+    continuous_ij  :: AbstractArray{T},
+    class_value_ij :: AbstractArray{S},
+    class_uniq     :: AbstractArray{S})
 
-        n = length(continuous_ij)
-        J = length(class_uniq)
+    n = length(continuous_ij)
+    J = length(class_uniq)
 
-        first_part = lfact(n+J-1) - lfact(J-1) - lfact(n)
-        second_part = lfact(n)
-        # Note(Yi-Chun): lfact(n) is log(n!)
+    first_part = lfact(n+J-1) - lfact(J-1) - lfact(n)
+    second_part = lfact(n)
+    # Note(Yi-Chun): lfact(n) is log(n!)
 
-        for J_index = 1:J
-                n_J = count(x->x==class_uniq[J_index],class_value_ij)
-                second_part = second_part - lfact(n_J)
-        end
+    for J_index = 1:J
+            n_J = count(x->x==class_uniq[J_index],class_value_ij)
+            second_part = second_part - lfact(n_J)
+    end
 
-        return first_part+second_part
+    return first_part+second_part
 end
 
-function optimal_result{T<:FloatingPoint, S<:Integer}(
-        continuous      :: AbstractArray{T},
-        discrete_target :: AbstractArray{S}
-        )
+function optimal_result{T<:AbstractFloat, S<:Integer}(
+    continuous      :: AbstractArray{T},
+    discrete_target :: AbstractArray{S}
+    )
 
-        n = length(continuous)
+    n = length(continuous)
 
-        Disc_ijk_retval = Array(Array,n,n)
-        Disc_ijk_MODL_value = Array(FloatingPoint,n,n)
-        for j = 1:n
-                for k = 1:n
-                        if k > j
-                                Disc_ijk_MODL_value[j,k] = Inf
-                                Disc_ijk_retval[j,k] = [0]
-                        end
+    Disc_ijk_retval = Array(Array,n,n)
+    Disc_ijk_MODL_value = Array(AbstractFloat,n,n)
+    for j = 1:n
+            for k = 1:n
+                    if k > j
+                            Disc_ijk_MODL_value[j,k] = Inf
+                            Disc_ijk_retval[j,k] = [0]
+                    end
+            end
+    end
+
+    class_uniq = unique(discrete_target)
+
+    for k = 1:n
+        for j = k:n
+            if k == 1
+                Disc_ijk_retval[j,k] = [j]
+                Disc_ijk_MODL_value[j,k] = MODL_value2_oneintval(
+                                      continuous[1:j], discrete_target[1:j],class_uniq)
+            else
+                MODL_value = Inf
+                select_intval = 0
+
+                for i = 1:j-1
+                    second_MODL = MODL_value2_oneintval(
+                                  continuous[i+1:j],discrete_target[i+1:j],class_uniq)
+                    current_MODL = Disc_ijk_MODL_value[i,k-1] + second_MODL
+                    if current_MODL < MODL_value
+                        MODL_value = current_MODL
+                        select_intval = i
+                    end
                 end
+
+                Disc_ijk_retval[j,k] = append!(copy(Disc_ijk_retval[select_intval,k-1]),[j])
+                Disc_ijk_MODL_value[j,k] = MODL_value
+            end
+
         end
+    end
 
-        class_uniq = unique(discrete_target)
+    full_length_k_intval = copy(Disc_ijk_MODL_value[n,:])
 
-        for k = 1:n
-                for j = k:n
-                        if k == 1
-                                Disc_ijk_retval[j,k] = [j]
-                                Disc_ijk_MODL_value[j,k] = MODL_value2_oneintval(
-                                                      continuous[1:j], discrete_target[1:j],class_uniq)
+    for l = 1:n
+        full_length_k_intval[l] += lfact(n+l-1) - lfact(l-1) - lfact(n)
+    end
 
-                        else
-                                MODL_value = Inf
-                                select_intval = 0
+    desired_intval_number = indmin(full_length_k_intval)
 
-                                for i = 1:j-1
-                                        second_MODL = MODL_value2_oneintval(
-                                                      continuous[i+1:j],discrete_target[i+1:j],class_uniq)
-                                        current_MODL = Disc_ijk_MODL_value[i,k-1] + second_MODL
-                                        if current_MODL < MODL_value
-                                                MODL_value = current_MODL
-                                                select_intval = i
-                                        end
-                                end
+    bin_edges_index = Disc_ijk_retval[n,desired_intval_number]
+    bin_edges = append!([1],bin_edges_index)
 
-                                Disc_ijk_retval[j,k] = append!(copy(Disc_ijk_retval[select_intval,k-1]),[j])
-                                Disc_ijk_MODL_value[j,k] = MODL_value
-                        end
+    bin_edge_value = Array(AbstractFloat,length(bin_edges))
 
-                end
+    for index = 1 : length(bin_edge_value)
+        if index == 1
+                bin_edge_value[index] = continuous[1]
+        elseif index == length(bin_edge_value)
+                bin_edge_value[index] = continuous[end]
+        else
+                bin_edge_value[index] = 0.5*(continuous[bin_edges[index]]+
+                                             continuous[bin_edges[index]+1])
         end
-
-        full_length_k_intval = copy(Disc_ijk_MODL_value[n,:])
-
-        for l = 1:n
-                full_length_k_intval[l] += lfact(n+l-1) - lfact(l-1) - lfact(n)
-        end
-
-        desired_intval_number = indmin(full_length_k_intval)
-
-        bin_edges_index = Disc_ijk_retval[n,desired_intval_number]
-        bin_edges = append!([1],bin_edges_index)
-
-        bin_edge_value = Array(FloatingPoint,length(bin_edges))
-
-        for index = 1 : length(bin_edge_value)
-                if index == 1
-                        bin_edge_value[index] = continuous[1]
-                elseif index == length(bin_edge_value)
-                        bin_edge_value[index] = continuous[end]
-                else
-                        bin_edge_value[index] = 0.5*(continuous[bin_edges[index]]+
-                                                     continuous[bin_edges[index]+1])
-                end
-        end
-        return bin_edge_value
+    end
+    return bin_edge_value
 end
 
 
@@ -138,14 +137,14 @@ function merge_adj_intval{S<:Integer}(
     Delta = lfact(n_A+n_B+J-1) + lfact(J-1) - lfact(n_A+J-1) - lfact(n_B+J-1)
 
     for j = 1:J
-            n_A_J = A_distr[j]
-            n_B_J = B_distr[j]
-            Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
+        n_A_J = A_distr[j]
+        n_B_J = B_distr[j]
+        Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
     end
     return Delta
 end
 
-function greedy_merge_index{T<:FloatingPoint,S<:Integer}(
+function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     continuous  :: AbstractArray{T},
     class_value :: AbstractArray{S})
 
@@ -297,7 +296,7 @@ function greedy_merge_index{T<:FloatingPoint,S<:Integer}(
         return binedges
     else
         binedges = sort(collect(keys(distr_in_intval)))
-        while ((peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0)&(n_intval>2)
+        while ((peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0) && (n_intval>2)
             MODL = MODL + peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
             n_intval = n_intval-1
             removed = dequeue!(pq)
@@ -323,7 +322,7 @@ function greedy_merge_index{T<:FloatingPoint,S<:Integer}(
     end
 end
 
-function greedy_merge{T<:FloatingPoint,S<:Integer}(
+function greedy_merge{T<:AbstractFloat,S<:Integer}(
     continuous  :: AbstractArray{T},
     class_value :: AbstractArray{S})
     binedges = greedy_merge_index(continuous,class_value)
@@ -481,10 +480,10 @@ function PQ_methods_updata(continuous,class_value,uniq_class,binedges,distr,post
 end
 
 function remove_methods_on_index(index,methods_on_index,post_pq,effects)
-    methods = methods_on_index[index]
-    for i = 1: length(methods)
-        post_pq[(index,methods[i])] = Inf
-        delete!(effects,(index,methods[i]))
+    meth = methods_on_index[index]
+    for i = 1: length(meth)
+        post_pq[(index,meth[i])] = Inf
+        delete!(effects,(index,meth[i]))
     end
 end
 
@@ -507,7 +506,7 @@ function merge_adj_intval{S<:Integer}(
 end
 
 
-function uncondi_greedy_merge_index{T<:FloatingPoint,S<:Integer}(
+function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     continuous  :: AbstractArray{T},
     class_value :: AbstractArray{S}
     )
@@ -572,7 +571,7 @@ function uncondi_greedy_merge_index{T<:FloatingPoint,S<:Integer}(
     last_could_remove = n
 
     # Note(Yi-Chun): This best_so_far part will record the best dicretization we meet while merging unconditionally
-    best_so_far = [1:1:n]
+    best_so_far = collect(1:n)
     best_so_far_MODL = Inf
     best_adj = Dict()
     best_distr = Dict()
@@ -581,78 +580,75 @@ function uncondi_greedy_merge_index{T<:FloatingPoint,S<:Integer}(
         min_diff = peek(pq)[2]
         first_term_in_delta = log((n_intval-1)/(n+n_intval-1))
 
-        if true
-            MODL = MODL + min_diff + first_term_in_delta
-            removed = dequeue!(pq)
-            if removed == first_could_remove
-                @assert(length(adj_for_intval[removed]) == 3)
-                @assert(adj_for_intval[removed][1] == 1)
-                z = adj_for_intval[removed][2]
-                w = adj_for_intval[removed][3]
-                first_could_remove = z
-                # Note(Yi-Chun): Merge the distribution
-                Merge_distr = distr_in_intval[1] + distr_in_intval[removed]
-                # Note(Yi-Chun): Update the Delta value for the only one adjacent
-                pq[z] = merge_adj_intval(Merge_distr,distr_in_intval[z])
-                # Note(Yi-Chun): Update the structure
-                distr_in_intval[1] = Merge_distr
-                # Note(Yi-Chun): Update the pointers
-                adj_for_intval[1][1] = z
-                adj_for_intval[1][2] = w
-                s = adj_for_intval[z][4]
-                adj_for_intval[z] = [1,w,s]
-                adj_for_intval[w][1] = 1
-                # Note(Yi-Chun): Delete the information of removed one
-                delete!(adj_for_intval,removed)
-                delete!(distr_in_intval,removed)
-            elseif removed == last_could_remove
-                @assert(length(adj_for_intval[removed]) == 2)
-                x = adj_for_intval[removed][1]
-                y = adj_for_intval[removed][2]
-                last_could_remove = y
-                Merge_distr = distr_in_intval[y] + distr_in_intval[removed]
-                pq[y] = merge_adj_intval(distr_in_intval[x],Merge_distr)
-                distr_in_intval[y] = Merge_distr
-                pop!(adj_for_intval[x])
-                pop!(adj_for_intval[y])
-                delete!(adj_for_intval,removed)
-                delete!(distr_in_intval,removed)
-            else
-                # Note(Yi-Chun): Interval labels: x,y,(removed),z,w
-                # Note(Yi-Chun): Merge the distribution
-                y = adj_for_intval[removed][2]
-                Merge_distr = distr_in_intval[y] + distr_in_intval[removed]
-                # Note(Yi-Chun): Update the Delta value for two adjacents
-                x = adj_for_intval[removed][1]
-                pq[y] = merge_adj_intval(distr_in_intval[x],Merge_distr)
-                z= adj_for_intval[removed][3]
-                pq[z] = merge_adj_intval(Merge_distr,distr_in_intval[z])
-                # Note(Yi-Chun): Update the structure
-                distr_in_intval[y] = Merge_distr
-                if length(adj_for_intval[removed]) == 3
-                    adj_for_intval[y][3] = z
-                    pop!(adj_for_intval[y])
-                    adj_for_intval[x][end] = z
-                    adj_for_intval[z][1] = x
-                    adj_for_intval[z][2] = y
-                else
-                    w = adj_for_intval[removed][4]
-                    adj_for_intval[x][end] = z
-                    adj_for_intval[y][end-1] = z
-                    adj_for_intval[y][end] = w
-                    adj_for_intval[z][1] = x
-                    adj_for_intval[z][2] = y
-                    adj_for_intval[w][1] = y
-                end
-                # Note(Yi-Chun): Delete the information of removed one
-                delete!(adj_for_intval,removed)
-                delete!(distr_in_intval,removed)
-            end
-            n_intval = n_intval - 1
+        MODL = MODL + min_diff + first_term_in_delta
+        removed = dequeue!(pq)
+        if removed == first_could_remove
+            @assert(length(adj_for_intval[removed]) == 3)
+            @assert(adj_for_intval[removed][1] == 1)
+            z = adj_for_intval[removed][2]
+            w = adj_for_intval[removed][3]
+            first_could_remove = z
+            # Note(Yi-Chun): Merge the distribution
+            Merge_distr = distr_in_intval[1] + distr_in_intval[removed]
+            # Note(Yi-Chun): Update the Delta value for the only one adjacent
+            pq[z] = merge_adj_intval(Merge_distr,distr_in_intval[z])
+            # Note(Yi-Chun): Update the structure
+            distr_in_intval[1] = Merge_distr
+            # Note(Yi-Chun): Update the pointers
+            adj_for_intval[1][1] = z
+            adj_for_intval[1][2] = w
+            s = adj_for_intval[z][4]
+            adj_for_intval[z] = [1,w,s]
+            adj_for_intval[w][1] = 1
+            # Note(Yi-Chun): Delete the information of removed one
+            delete!(adj_for_intval,removed)
+            delete!(distr_in_intval,removed)
+        elseif removed == last_could_remove
+            @assert(length(adj_for_intval[removed]) == 2)
+            x = adj_for_intval[removed][1]
+            y = adj_for_intval[removed][2]
+            last_could_remove = y
+            Merge_distr = distr_in_intval[y] + distr_in_intval[removed]
+            pq[y] = merge_adj_intval(distr_in_intval[x],Merge_distr)
+            distr_in_intval[y] = Merge_distr
+            pop!(adj_for_intval[x])
+            pop!(adj_for_intval[y])
+            delete!(adj_for_intval,removed)
+            delete!(distr_in_intval,removed)
         else
-            break
+            # Note(Yi-Chun): Interval labels: x,y,(removed),z,w
+            # Note(Yi-Chun): Merge the distribution
+            y = adj_for_intval[removed][2]
+            Merge_distr = distr_in_intval[y] + distr_in_intval[removed]
+            # Note(Yi-Chun): Update the Delta value for two adjacents
+            x = adj_for_intval[removed][1]
+            pq[y] = merge_adj_intval(distr_in_intval[x],Merge_distr)
+            z= adj_for_intval[removed][3]
+            pq[z] = merge_adj_intval(Merge_distr,distr_in_intval[z])
+            # Note(Yi-Chun): Update the structure
+            distr_in_intval[y] = Merge_distr
+            if length(adj_for_intval[removed]) == 3
+                adj_for_intval[y][3] = z
+                pop!(adj_for_intval[y])
+                adj_for_intval[x][end] = z
+                adj_for_intval[z][1] = x
+                adj_for_intval[z][2] = y
+            else
+                w = adj_for_intval[removed][4]
+                adj_for_intval[x][end] = z
+                adj_for_intval[y][end-1] = z
+                adj_for_intval[y][end] = w
+                adj_for_intval[z][1] = x
+                adj_for_intval[z][2] = y
+                adj_for_intval[w][1] = y
+            end
+            # Note(Yi-Chun): Delete the information of removed one
+            delete!(adj_for_intval,removed)
+            delete!(distr_in_intval,removed)
         end
-        if (MODL < best_so_far_MODL)&(n_intval<length_of_Greedy_merge+5)
+        n_intval = n_intval - 1
+
+        if (MODL < best_so_far_MODL) && (n_intval<length_of_Greedy_merge+5)
             best_so_far_MODL = MODL
             best_so_far = deepcopy(collect(keys(distr_in_intval)))
             best_distr = deepcopy(distr_in_intval)
@@ -862,20 +858,20 @@ function post_greedy_index(continuous,class_value,upper_bound = 0)
                     methods_on_index[bins[be_modified]] = ["S"]
                 end
                 # Note(Yi-Chun): Update the method "Merge"
-                if (be_modified > 0)&(be_modified+1 < current_I+1)
+                if (be_modified > 0) && (be_modified+1 < current_I+1)
                     PQ_methods_updata(continuous,class_value,uniq_class,bins,distr,
                                         post_pq,effects,be_modified,"M")
 
                     append!(methods_on_index[bins[be_modified]],["M"])
                 end
                 # Note(Yi-Chun): Update the method "MergeSplit"
-                if (be_modified > 0)&(be_modified+1 < current_I+1)
+                if (be_modified > 0) && (be_modified+1 < current_I+1)
                     PQ_methods_updata(continuous,class_value,uniq_class,bins,distr,
                                         post_pq,effects,be_modified,"MS")
                     append!(methods_on_index[bins[be_modified]],["MS"])
                 end
                 # Note(Yi-Chun): Update the method "MergeMergeSplit"
-                if (be_modified > 0)&(be_modified+2 < current_I+1)
+                if (be_modified > 0) && (be_modified+2 < current_I+1)
                     PQ_methods_updata(continuous,class_value,uniq_class,bins,distr,
                                         post_pq,effects,be_modified,"MMS")
                     append!(methods_on_index[bins[be_modified]],["MMS"])

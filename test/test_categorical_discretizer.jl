@@ -1,5 +1,5 @@
 for cd in (
-    CategoricalDiscretizer([:A=>1, :B=>2, :C=>3]),
+    CategoricalDiscretizer(Dict(:A=>1, :B=>2, :C=>3)),
     CategoricalDiscretizer([:A, :B, :C], Int),
     CategoricalDiscretizer([:A, :B, :C])
     )
@@ -12,7 +12,7 @@ for cd in (
     @test_throws KeyError encode(cd, [:A, :D])
 
     @test decode(cd, 2) == :B
-    @test decode(cd, uint8(2)) == :B
+    @test decode(cd, 2 % UInt8 ) == :B
     @test decode(cd, [3,2,1,2,3]) == [:C, :B, :A, :B, :C]
     @test decode(cd, [1 2; 3 1]) == [:A :B; :C :A]
 

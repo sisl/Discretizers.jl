@@ -1,14 +1,14 @@
 
-type DiscretizeUniformCount <: DiscretizationAlgorithm 
-    nbins :: Int
+type DiscretizeUniformCount <: DiscretizationAlgorithm
+    nbins::Int
 end
 
-function binedges{N<:FloatingPoint}(alg::DiscretizeUniformCount, data::AbstractArray{N})
-    
+function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractArray{N})
+
     nbins = alg.nbins
 
     n = length(data)
-    n >= nbins || error("too many bins requested")
+    n ≥ nbins || error("too many bins requested")
 
     p = sortperm(data)
     counts_per_bin, remainder = div(n,nbins), rem(n,nbins)
@@ -17,7 +17,7 @@ function binedges{N<:FloatingPoint}(alg::DiscretizeUniformCount, data::AbstractA
     retval[end] = data[p[end]]
 
     ind = 0
-    for i = 2 : nbins
+    for i in 2 : nbins
         counts = counts_per_bin + (remainder > 0.0 ? 1 : 0)
         remainder -= 1.0
         ind += counts

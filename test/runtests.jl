@@ -1,7 +1,7 @@
 using Base.Test
-using Lint
 
-lintpkg( "Discretizers" )
+# using Lint
+# lintpkg( "Discretizers" )
 # @test isempty(lintpkg( "Discretizers", returnMsgs=true))
 
 ################
@@ -18,7 +18,7 @@ function array_matches{S<:Integer, T<:Integer}(arr::AbstractVector{S}, arr2::Abs
     end
     true
 end
-function array_matches{S<:Real, T<:Real}(arr::AbstractVector{S}, arr2::AbstractVector{T}, abs_tolerance::FloatingPoint=eps(Float64))
+function array_matches{S<:Real, T<:Real}(arr::AbstractVector{S}, arr2::AbstractVector{T}, abs_tolerance::AbstractFloat=eps(Float64))
     n = length(arr)
     @assert(length(arr2) == n)
     for i = 1 : n

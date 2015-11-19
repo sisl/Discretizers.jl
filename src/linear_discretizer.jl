@@ -24,7 +24,7 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, i2d::Dict{
     force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST )
 
     length(binedges) > 1 || error("bin edges must contain at least 2 values")
-    findfirst(i->binedges[i-1] >= binedges[i], [2:length(binedges)]) == 0 || 
+    findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges) ) == 0 ||
         error("Bin edges must be sorted in increasing order")
     for i = 1 : length(binedges)-1
         haskey(i2d, i) || error("i2d must contain all necessary keys")
@@ -34,21 +34,21 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, i2d::Dict{
     for (k,v) in i2d
         d2i[v] = k
     end
-    
+
     LinearDiscretizer{N,D}(binedges, length(binedges)-1, i2d, d2i, force_outliers_to_closest)
 end
 function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, ::Type{D} = Int;
     force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST )
 
     length(binedges) > 1 || error("bin edges must contain at least 2 values")
-    findfirst(i->binedges[i-1] > binedges[i], [2:length(binedges)]) == 0 || 
+    findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges) ) == 0 ||
         error("Bin edges must be sorted in increasing order")
 
     i2d = Dict{Int,D}()
-    for i = 1 : length(binedges)-1
+    for i in 1 : length(binedges)-1
         i2d[i] = convert(D, i)
     end
-    
+
     LinearDiscretizer(binedges,i2d,force_outliers_to_closest=force_outliers_to_closest)
 end
 
@@ -101,19 +101,19 @@ function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray)
     reshape(arr, size(data))
 end
 
-function decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniform)
+function decode{N<:AbstractFloat,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniform)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
     convert(N, lo + rand()*(hi-lo))
 end
-function decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleBinCenter)
+function decode{N<:AbstractFloat,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleBinCenter)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
     convert(N, (hi + lo)/2)
 end
-function decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniformZeroBin)
+function decode{N<:AbstractFloat,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniformZeroBin)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
@@ -123,7 +123,7 @@ function decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, :
     end
     return convert(N, lo + rand()*(hi-lo))
 end
-decode{N<:FloatingPoint,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D) = decode(ld, d, SAMPLE_UNIFORM)
+decode{N<:AbstractFloat,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D) = decode(ld, d, SAMPLE_UNIFORM)
 
 function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniform)
     ind = ld.d2i[d]
@@ -144,8 +144,8 @@ function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::Sampl
 end
 function decode{N<:Integer,D<:Integer}(ld::LinearDiscretizer{N,D}, d::D, ::SampleUniformZeroBin)
     ind = ld.d2i[d]
-    lo = int(ld.binedges[ind])
-    hi = int(ld.binedges[ind+1])
+    lo = round(Int, ld.binedges[ind])
+    hi = round(Int, ld.binedges[ind+1])
 
     if lo ≤ 0 ≤ hi
         retval = 0
@@ -177,7 +177,7 @@ function extrema{N,D}(ld::LinearDiscretizer{N,D})
     hi  = ld.binedges[end]
     (lo, hi)
 end
-function extrema{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}, d::D)
+function extrema{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}, d::D)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
@@ -199,7 +199,7 @@ function totalwidth(ld::LinearDiscretizer)
 end
 
 nlabels(ld::LinearDiscretizer) = ld.nbins
-bincenters{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
+bincenters{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
 function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
     retval = Array(Float64, ld.nbins)
     for i = 1 : length(retval)-1
@@ -208,5 +208,5 @@ function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
     retval[end] = 0.5(ld.binedges[end] + ld.binedges[end-1])
     retval
 end
-binwidth{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}, d::D) = ld.binedges[d+1] - ld.binedges[d]
-binwidths{N<:FloatingPoint,D}(ld::LinearDiscretizer{N,D}) = ld.binedges[2:end] - ld.binedges[1:end-1]
+binwidth{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}, d::D) = ld.binedges[d+1] - ld.binedges[d]
+binwidths{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}) = ld.binedges[2:end] - ld.binedges[1:end-1]
