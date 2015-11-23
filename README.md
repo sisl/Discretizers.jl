@@ -1,6 +1,6 @@
 # Discretizers
 
-This package supports discretization methods and discretization mappings.
+This package supports discretization methods and discretization mappings for turning continuous data to and from discrete data.
 
 Please read the [documentation](http://nbviewer.ipython.org/github/sisl/Discretizers.jl/blob/master/doc/Discretizers.ipynb).
 
