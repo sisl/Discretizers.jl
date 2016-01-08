@@ -6,9 +6,18 @@ immutable HybridDiscretizer{N<:Real, D<:Integer} <: AbstractDiscretizer{N,D}
     cat :: CategoricalDiscretizer{N,D}
     lin :: LinearDiscretizer{N,D}
 end
-function datalineardiscretizer{D<:Integer}(binedges::Vector{Float64}, ::Type{D}=Int)
-    categorical = CategoricalDiscretizer(@compat Dict{Float64, Int}(Inf=>1))
-    linear = LinearDiscretizer(binedges, D)
+
+"""
+a hybrid discretizers that maps a special missing value indicator (typically Inf or NaN)
+to a discrete bin, but otherwise is a linear discretizer
+"""
+function datalineardiscretizer{D<:Integer}(binedges::Vector{Float64}, ::Type{D}=Int;
+    missing_key::Float64=Inf,
+    force_outliers_to_closest::Bool=DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST,
+    )
+
+    categorical = CategoricalDiscretizer(@compat Dict{Float64, Int}(missing_key=>1))
+    linear = LinearDiscretizer(binedges, D, force_outliers_to_closest=force_outliers_to_closest)
     HybridDiscretizer{Float64,D}(categorical, linear)
 end
 
