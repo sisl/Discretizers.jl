@@ -24,8 +24,16 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, i2d::Dict{
     force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST )
 
     length(binedges) > 1 || error("bin edges must contain at least 2 values")
-    findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges) ) == 0 ||
-        error("Bin edges must be sorted in increasing order")
+
+    if N <: AbstractFloat
+        findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)) == 0 ||
+            error("Bin edges must be sorted in increasing order")
+    else # for integers, bins of unit width require repeated values
+        (findfirst(i->binedges[i-1] ≥ binedges[i], 3:length(binedges)) == 0 &&
+         findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges)) == 0 ) ||
+            error("Bin edges must be sorted in increasing order")
+    end
+
     for i = 1 : length(binedges)-1
         haskey(i2d, i) || error("i2d must contain all necessary keys")
     end
@@ -41,8 +49,15 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, ::Type{D} 
     force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST )
 
     length(binedges) > 1 || error("bin edges must contain at least 2 values")
-    findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges) ) == 0 ||
-        error("Bin edges must be sorted in increasing order")
+
+    if N <: AbstractFloat
+        findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)) == 0 ||
+            error("Bin edges must be sorted in increasing order")
+    else # for integers, bins of unit width require repeated values
+        (findfirst(i->binedges[i-1] ≥ binedges[i], 3:length(binedges)) == 0 &&
+         findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges)) == 0 ) ||
+            error("Bin edges must be sorted in increasing order")
+    end
 
     i2d = Dict{Int,D}()
     for i in 1 : length(binedges)-1
