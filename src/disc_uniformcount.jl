@@ -45,7 +45,7 @@ function binedges{N<:Integer}(alg::DiscretizeUniformCount, data::AbstractArray{N
         counts = counts_per_bin + (remainder > 0.0 ? 1 : 0)
         remainder -= 1.0
         ind += counts
-        retval[i] = data[p[ind+1]] # value V will be placed in bin B if V ∈ [Bₗ Bᵣ)
+        retval[i] = ceil(Int, (data[p[ind]] + data[p[ind+1]])/2) # value V will be placed in bin B if V ∈ [Bₗ Bᵣ)
         retval[i-1] != retval[i] || error("binedges non-unique") # TODO(tim): should make the algorithm handle this
     end
 

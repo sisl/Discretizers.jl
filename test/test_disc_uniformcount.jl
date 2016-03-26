@@ -6,5 +6,6 @@
 
 @test binedges(DiscretizeUniformCount(2), [1,2]) == [1, 2, 2]
 @test binedges(DiscretizeUniformCount(3), [1,2,2,2,3]) == [1, 2, 3, 3]
-@test binedges(DiscretizeUniformCount(3), [1,2,2,2,50]) == [1, 2, 50, 50]
-@test binedges(DiscretizeUniformCount(3), [1,1,1,2,3,4,50,51,52]) == [1, 2, 50, 52]
+@test binedges(DiscretizeUniformCount(3), [1,2,2,2,50]) == [1, 2, 26, 50]
+@test binedges(DiscretizeUniformCount(3), [1,2,2,2,51]) == [1, 2, 27, 51]
+@test binedges(DiscretizeUniformCount(3), [1,1,1,2,3,4,50,51,52]) == [1, 2, 27, 52]
