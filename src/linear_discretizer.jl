@@ -29,7 +29,7 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, i2d::Dict{
         findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)) == 0 ||
             error("Bin edges must be sorted in increasing order")
     else # for integers, bins of unit width require repeated values
-        (findfirst(i->binedges[i-1] ≥ binedges[i], 3:length(binedges)) == 0 &&
+        (findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)-1) == 0 &&
          findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges)) == 0 ) ||
             error("Bin edges must be sorted in increasing order")
     end
@@ -54,7 +54,7 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, ::Type{D} 
         findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)) == 0 ||
             error("Bin edges must be sorted in increasing order")
     else # for integers, bins of unit width require repeated values
-        (findfirst(i->binedges[i-1] ≥ binedges[i], 3:length(binedges)) == 0 &&
+        (findfirst(i->binedges[i-1] ≥ binedges[i], 2:length(binedges)-1) == 0 &&
          findfirst(i->binedges[i-1] > binedges[i], 2:length(binedges)) == 0 ) ||
             error("Bin edges must be sorted in increasing order")
     end
