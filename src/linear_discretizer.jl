@@ -66,6 +66,10 @@ function LinearDiscretizer{N<:Real, D<:Integer}( binedges::Vector{N}, ::Type{D} 
 
     LinearDiscretizer(binedges,i2d,force_outliers_to_closest=force_outliers_to_closest)
 end
+function LinearDiscretizer{N<:Real, D<:Integer}(arr::AbstractVector{N}, ::Type{D}=Int;
+    force_outliers_to_closest::Bool = DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST)
+    LinearDiscretizer(convert(Vector{N}, arr), D, force_outliers_to_closest=force_outliers_to_closest)
+end
 
 function supports_encoding{N<:Real,D<:Integer}(ld::LinearDiscretizer{N,D}, x::N)
     if ld.force_outliers_to_closest
