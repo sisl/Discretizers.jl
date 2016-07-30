@@ -5,6 +5,7 @@ module Discretizers
 using Compat
 
 import Base: extrema
+import StatsBase: percentile
 
 export
     # generic types
@@ -19,6 +20,8 @@ export
     # discretization algorithms
     DiscretizeUniformWidth,
     DiscretizeUniformCount,
+    DiscretizeFreedman,
+    DiscretizeKnuth,
     DiscretizeMODL_Optimal,
     DiscretizeMODL_Greedy,
     DiscretizeMODL_PostGreedy,
@@ -62,9 +65,11 @@ include("linear_discretizer.jl")
 include("hybrid_discretizer.jl")
 
 
-include("disc_uniformwidth.jl")
-include("disc_uniformcount.jl")
-include("disc_MODL.jl")
+include(joinpath("discretization_algs", "uniformwidth.jl"))
+include(joinpath("discretization_algs", "uniformcount.jl"))
+include(joinpath("discretization_algs", "freedman.jl"))
+include(joinpath("discretization_algs", "knuth.jl"))
+include(joinpath("discretization_algs", "MODL.jl"))
 
 
 end # module
