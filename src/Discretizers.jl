@@ -22,6 +22,7 @@ export
     DiscretizeMODL_Optimal,
     DiscretizeMODL_Greedy,
     DiscretizeMODL_PostGreedy,
+    DiscretizeBayesianBlocks,
 
     # sampling methods
     AbstractSampleMethod,
@@ -65,6 +66,7 @@ include("hybrid_discretizer.jl")
 include("disc_uniformwidth.jl")
 include("disc_uniformcount.jl")
 include("disc_MODL.jl")
+include("disc_bayesianblocks.jl")
 
 
 end # module

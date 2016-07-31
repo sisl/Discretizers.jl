@@ -1,0 +1,83 @@
+# Bayesian blocks
+# Implementation by Michael P.H. Stumpf and T. Chan
+# Based on the Python Code of Jake Vanderplas.
+
+# This version implements Bayesian blocks for histograms, where the
+# data are sorted, then treated as event data (see Scargle 2012).
+# Defaults as suggested in Scargle 2012 are used.
+
+# References:
+# Scargle 2012: http://adsabs.harvard.edu/abs/2012arXiv1207.5578S
+# Python implementation: https://github.com/astroML/astroML/blob/master/astroML/density_estimation/bayesian_blocks.py
+
+type DiscretizeBayesianBlocks <: DiscretizationAlgorithm
+end
+
+function invVector(input::Array{Float64,})
+	len = length(input)
+	output = zeros(len)
+	for i in 1:len
+		output[len+1-i]=input[i]
+	end
+	return output
+end
+
+function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})
+
+	unique_data = unique(data)
+	unique_data = sort(unique_data)
+
+	n = length(unique_data) # Number of observations
+
+	edges = zeros(n+1)
+	edges[1] = unique_data[1]
+	for i in 1 : (n-1)
+		edges[i+1] = 0.5 * (unique_data[i]+unique_data[i+1])
+	end
+	edges[end] = unique_data[end]
+	block_length = unique_data[end] - edges
+
+	if length(unique_data) == length(data)
+		nn_vec = ones(length(data))
+	else
+		nn_vec = convert(Array{Float64}, [length(findin(data, v)) for v in unique_data])
+	end
+	best = zeros(n)
+	last = zeros(Int64,n)
+
+	for K in 1 : n
+		width = block_length[1 : K] - block_length[K+1]
+		count_vec = invVector(cumsum(invVector(nn_vec[1 : K])))
+
+		# Fitness function (eq. 19 from Scargle 2012)
+		fit_vec = count_vec .* (log(count_vec) - log(width))
+		# Prior (eq. 21 from Scargle 2012)
+		fit_vec -= 4 - log(73.53 * 0.05 * ((K)^-0.478))
+		fit_vec[2:end] += best[1 : K-1]
+
+		i_max = indmax(fit_vec)
+		last[K] = i_max
+		best[K] = fit_vec[i_max]
+	end
+
+	change_points = zeros(Int64,n)
+	i_cp = n+1
+	ind = n+1
+	while true
+		i_cp -= 1
+		change_points[i_cp] = ind
+		if ind == 1
+			break
+		end
+		ind = last[ind-1]
+	end
+	change_points = change_points[i_cp : end]
+	edges[change_points]
+
+end
+function binedges{N<:Integer}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})
+
+	data = convert(Array{typeof(0.0)}, data)
+	binedges(alg, data)
+
+end
