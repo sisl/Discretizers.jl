@@ -45,6 +45,9 @@ export
     binwidth,           # the width of the ith bin
     binwidths,          # an array of bin widths
 
+    get_discretization_counts, # get a list of counts; can be used to generate a histogram
+    get_histogram_plot_arrays, # returns arr_x and arr_y for plotting a histogram given binedges and counts
+
     datalineardiscretizer, # build a linear discretizer which maps Inf to a bin
 
     # linear discretizer
