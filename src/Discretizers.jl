@@ -5,6 +5,7 @@ module Discretizers
 using Compat
 
 import Base: extrema
+import StatsBase: iqr, moment
 
 export
     # generic types

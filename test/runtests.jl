@@ -34,6 +34,9 @@ include("test_categorical_discretizer.jl")
 include("test_linear_discretizer.jl")
 include("test_hybrid_discretizer.jl")
 
+include("test_common.jl")
+
 include("test_disc_uniformwidth.jl")
 include("test_disc_uniformcount.jl")
+include("test_disc_bayesian_blocks.jl")
 include("test_disc_MODL.jl")

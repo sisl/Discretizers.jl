@@ -218,6 +218,7 @@ function totalwidth(ld::LinearDiscretizer)
 end
 
 nlabels(ld::LinearDiscretizer) = ld.nbins
+binedges(ld::LinearDiscretizer) = ld.binedges
 bincenters{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
 function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
     retval = Array(Float64, ld.nbins)
