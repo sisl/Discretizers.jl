@@ -14,14 +14,15 @@ decoded_type{N,D}(::AbstractDiscretizer{N,D}) = N
 
 abstract DiscretizationAlgorithm
 
-function get_discretization_counts(disc::AbstractDiscretizer, data::Array)
+function get_discretization_counts(disc::AbstractDiscretizer, data::AbstractArray)
     counts = zeros(Int, nlabels(disc))
     for v in data
         counts[encode(disc, v)] += 1
     end
     counts
 end
-function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, counts::Vector{I})
+
+function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, counts::AbstractVector{I})
     n = length(binedges)
     n == length(counts)+1 || error("binedges must have exactly one more entry than counts!")
     
@@ -36,7 +37,7 @@ function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, cou
 
     (arr_x, arr_y)
 end
-function get_histogram_plot_arrays{R<:Real, F<:Real}(binedges::Vector{R}, pdfs::Vector{F})
+function get_histogram_plot_arrays{R<:Real, F<:Real}(binedges::Vector{R}, pdfs::AbstractVector{F})
     n = length(binedges)
     n == length(pdfs)+1 || error("binedges must have exactly one more entry than counts!")
     
