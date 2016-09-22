@@ -122,7 +122,6 @@ function optimal_result{T<:AbstractFloat, S<:Integer}(
     return bin_edge_value
 end
 
-
 function merge_adj_intval{S<:Integer}(
     A_distr   :: AbstractArray{S}, # Note(Yi-Chun): Distribution of class values in A
     B_distr   :: AbstractArray{S}  # Note(Yi-Chun): Distribution of class values in B
@@ -141,7 +140,7 @@ function merge_adj_intval{S<:Integer}(
         n_B_J = B_distr[j]
         Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
     end
-    return Delta
+    Delta
 end
 
 function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
@@ -488,22 +487,6 @@ function remove_methods_on_index(index,methods_on_index,post_pq,effects)
 end
 
 insert_and_dedup!(v::Vector, x) = (splice!(v, searchsorted(v,x), [x]); v)
-
-function merge_adj_intval{S<:Integer}(
-    A_distr   :: AbstractArray{S},
-    B_distr   :: AbstractArray{S})
-
-    J = length(B_distr)
-    n_A = sum(A_distr)
-    n_B = sum(B_distr)
-    Delta = lfact(n_A+n_B+J-1) + lfact(J-1) - lfact(n_A+J-1) - lfact(n_B+J-1)
-    for j = 1:J
-        n_A_J = A_distr[j]
-        n_B_J = B_distr[j]
-        Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
-    end
-    return Delta
-end
 
 
 function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
