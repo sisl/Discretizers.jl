@@ -1,5 +1,4 @@
 julia 0.4
 DataArrays 0.2.10
-StatsBase
-Compat
-Lint
+StatsBase 0.8.0
+Compat 0.8.0
