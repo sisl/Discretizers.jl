@@ -13,15 +13,6 @@
 type DiscretizeBayesianBlocks <: DiscretizationAlgorithm
 end
 
-function invVector(input::Array{Float64,})
-	len = length(input)
-	output = zeros(len)
-	for i in 1:len
-		output[len+1-i]=input[i]
-	end
-	return output
-end
-
 function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})
 
 	unique_data = unique(data)
@@ -42,15 +33,17 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::Abstrac
 	else
 		nn_vec = convert(Array{Float64}, [length(findin(data, v)) for v in unique_data])
 	end
+
+	count_vec = zeros(n)
 	best = zeros(n)
 	last = zeros(Int64,n)
 
 	for K in 1 : n
 		width = block_length[1 : K] - block_length[K+1]
-		count_vec = invVector(cumsum(invVector(nn_vec[1 : K])))
+		count_vec[1 : K] += nn_vec[K]
 
 		# Fitness function (eq. 19 from Scargle 2012)
-		fit_vec = count_vec .* (log(count_vec) - log(width))
+		fit_vec = count_vec[1 : K] .* log(count_vec[1 : K] ./ width)
 		# Prior (eq. 21 from Scargle 2012)
 		fit_vec -= 4 - log(73.53 * 0.05 * ((K)^-0.478))
 		fit_vec[2:end] += best[1 : K-1]
