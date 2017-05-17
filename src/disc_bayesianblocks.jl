@@ -43,7 +43,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::Abstrac
 		count_vec[1 : K] += nn_vec[K]
 
 		# Fitness function (eq. 19 from Scargle 2012)
-		fit_vec = count_vec[1 : K] .* log(count_vec[1 : K] ./ width)
+		fit_vec = count_vec[1 : K] .* log.(count_vec[1 : K] ./ width)
 		# Prior (eq. 21 from Scargle 2012)
 		fit_vec -= 4 - log(73.53 * 0.05 * ((K)^-0.478))
 		fit_vec[2:end] += best[1 : K-1]
