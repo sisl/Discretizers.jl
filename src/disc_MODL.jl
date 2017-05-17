@@ -1,4 +1,5 @@
 using Base.Collections
+using DataStructures
 
 abstract DiscretizeMODL <: DiscretizationAlgorithm
 
@@ -56,8 +57,8 @@ function optimal_result{T<:AbstractFloat, S<:Integer}(
 
     n = length(continuous)
 
-    Disc_ijk_retval = Array(Array,n,n)
-    Disc_ijk_MODL_value = Array(AbstractFloat,n,n)
+    Disc_ijk_retval = Array{Array}(n,n)
+    Disc_ijk_MODL_value = Array{AbstractFloat}(n,n)
     for j = 1:n
             for k = 1:n
                     if k > j
@@ -107,7 +108,7 @@ function optimal_result{T<:AbstractFloat, S<:Integer}(
     bin_edges_index = Disc_ijk_retval[n,desired_intval_number]
     bin_edges = append!([1],bin_edges_index)
 
-    bin_edge_value = Array(AbstractFloat,length(bin_edges))
+    bin_edge_value = Array{AbstractFloat}(length(bin_edges))
 
     for index = 1 : length(bin_edge_value)
         if index == 1
@@ -157,7 +158,7 @@ function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
         return [1]
     end
 
-    pq = PriorityQueue()
+    pq = DataStructures.PriorityQueue()
     # Note(Yi-Chun): The PriorQueue sorts differences of MODL after merging of adjacent intervals
     distr_in_intval = Dict()
     # Note(Yi-Chun): This dictionary contains the distribution in each interval
@@ -204,12 +205,12 @@ function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     last_could_remove = n
 
     while n_intval > 4
-        min_diff = peek(pq)[2]
+        min_diff = DataStructures.peek(pq)[2]
         first_term_in_delta = log((n_intval-1)/(n+n_intval-1))
 
         if (min_diff + first_term_in_delta) < 0
             MODL = MODL + min_diff + first_term_in_delta
-            removed = dequeue!(pq)
+            removed = DataStructures.dequeue!(pq)
             if removed == first_could_remove
                 # Note(Yi-Chun): Interval labels: y=1,(removed),z,w,s
                 @assert(length(adj_for_intval[removed]) == 3)
@@ -295,10 +296,10 @@ function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
         return binedges
     else
         binedges = sort(collect(keys(distr_in_intval)))
-        while ((peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0) && (n_intval>2)
-            MODL = MODL + peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
+        while ((DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0) && (n_intval>2)
+            MODL = MODL + DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
             n_intval = n_intval-1
-            removed = dequeue!(pq)
+            removed = DataStructures.dequeue!(pq)
             prior = binedges[findfirst(binedges,removed)-1]
             Merge_distr = distr_in_intval[removed] + distr_in_intval[prior]
             distr_in_intval[prior] = Merge_distr
@@ -313,7 +314,7 @@ function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
             end
         end
 
-        if (peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0
+        if (DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0
             return [1]
         else
             return binedges
@@ -327,7 +328,7 @@ function greedy_merge{T<:AbstractFloat,S<:Integer}(
     binedges = greedy_merge_index(continuous,class_value)
     append!(binedges,[length(continuous)])
     n = length(binedges)
-    bin_edges = Array(Float64,n)
+    bin_edges = Array{Float64}(n)
     for i = 2: n-1
         binedges[i] = binedges[i]-1
     end
@@ -501,7 +502,7 @@ function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     J = length(all_class_value)
     length_of_Greedy_merge = length(greedy_merge_index(continuous,class_value))
 
-    pq = PriorityQueue()
+    pq = DataStructures.PriorityQueue()
     distr_in_intval = Dict()
     adj_for_intval = Dict()
 
@@ -560,11 +561,11 @@ function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     best_distr = Dict()
 
     while n_intval > 4
-        min_diff = peek(pq)[2]
+        min_diff = DataStructures.peek(pq)[2]
         first_term_in_delta = log((n_intval-1)/(n+n_intval-1))
 
         MODL = MODL + min_diff + first_term_in_delta
-        removed = dequeue!(pq)
+        removed = DataStructures.dequeue!(pq)
         if removed == first_could_remove
             @assert(length(adj_for_intval[removed]) == 3)
             @assert(adj_for_intval[removed][1] == 1)
@@ -644,9 +645,9 @@ function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     else
         binedges = sort(collect(keys(distr_in_intval)))
         while (n_intval>2)
-            MODL = MODL + peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
+            MODL = MODL + DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
             n_intval = n_intval-1
-            removed = dequeue!(pq)
+            removed = DataStructures.dequeue!(pq)
             prior = binedges[findfirst(binedges,removed)-1]
             Merge_distr = distr_in_intval[removed] + distr_in_intval[prior]
             distr_in_intval[prior] = Merge_distr
@@ -667,7 +668,7 @@ function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
             end
         end
 
-        if (peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0
+        if (DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1)))<0
             best_for_far = [1]
             return (best_for_far,one_bin_distrib)
         else
@@ -708,7 +709,7 @@ function post_greedy_index(continuous,class_value,upper_bound = 0)
         append!(bins,[N+1])
         distr = Dict()
         for bin_index = 1 : I
-            distr[bins[bin_index]] = Array(Int64,J)
+            distr[bins[bin_index]] = Array{Int64}(J)
             for j_index = 1 : J
                 n_J = count(x->x==uniq_class[j_index],class_value[bins[bin_index]:bins[bin_index+1]-1])
                 distr[bins[bin_index]][j_index] = n_J
@@ -721,7 +722,7 @@ function post_greedy_index(continuous,class_value,upper_bound = 0)
     end
 
         # Note(Yi-Chun): Add methods on each bin into PriorityQueue
-        post_pq = PriorityQueue()
+        post_pq = DataStructures.PriorityQueue()
         # Note(Yi-Chun): keys in post_pq are represented as: (x,y), where x is the index of bin, y are methods.
         # Note(Yi-Chun): If "S"->split, "M"->merge, "MS"->merge_split, "MMS"->merge_merge_split
 
@@ -775,11 +776,11 @@ function post_greedy_index(continuous,class_value,upper_bound = 0)
         # Note(Yi-Chun): Here we start the dequeue process
         current_I = I
         time_dequeue = 0
-        while (peek(post_pq)[2] < -0.00001 )
-            MODL = peek(post_pq)[2]
+        while (DataStructures.peek(post_pq)[2] < -0.00001 )
+            MODL = DataStructures.peek(post_pq)[2]
             time_dequeue += 1
 
-            (removed_index,removed_method) = dequeue!(post_pq)
+            (removed_index,removed_method) = DataStructures.dequeue!(post_pq)
             removed_posit_bins = searchsorted(bins,removed_index)[1]
             # Note(Yi-Chun): Ittells the position of removed_index in binedges
 
@@ -875,7 +876,7 @@ end
 function post_greedy_result(continuous,class_value,upper_bound=0)
 
     binedges = post_greedy_index(continuous,class_value,upper_bound)
-    bins = Array(Float64,length(binedges))
+    bins = Array{Float64}(length(binedges))
     for i = 1 : length(binedges)
         if i==1
             bins[1] = continuous[1]
