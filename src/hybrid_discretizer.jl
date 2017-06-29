@@ -41,7 +41,7 @@ function encode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, x::N)
 end
 encode{N,D}(disc::HybridDiscretizer{N,D}, x) = encode(disc, convert(N, x))::D
 function encode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray)
-    arr = Array(D, length(data))
+    arr = Array{D}(length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(disc, x)
     end
@@ -60,7 +60,7 @@ decode{N<:Real,D<:Integer,E<:Integer}(disc::HybridDiscretizer{N,D}, d::E, method
     decode(disc, convert(D, d), method)
 
 function decode{N,D<:Integer}(disc::HybridDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
-    arr = Array(N, length(data))
+    arr = Array{N}(length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(disc, d)
     end

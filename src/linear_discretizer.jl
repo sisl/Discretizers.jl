@@ -113,7 +113,7 @@ function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, x::N)
 end
 encode{N,D}(ld::LinearDiscretizer{N,D}, x) = encode(ld, convert(N, x))::D
 function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray)
-    arr = Array(D, length(data))
+    arr = Array{D}(length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(ld, x)
     end
@@ -182,7 +182,7 @@ decode{N<:Real,D<:Integer,I<:Integer}(ld::LinearDiscretizer{N,D}, d::I, method::
     decode(ld, convert(D,d), method)
 
 function decode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
-    arr = Array(N, length(data))
+    arr = Array{N}(length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(ld, d)
     end
@@ -221,7 +221,7 @@ nlabels(ld::LinearDiscretizer) = ld.nbins
 binedges(ld::LinearDiscretizer) = ld.binedges
 bincenters{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
 function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
-    retval = Array(Float64, ld.nbins)
+    retval = Array{Float64}(ld.nbins)
     for i = 1 : length(retval)-1
         retval[i] = 0.5(ld.binedges[i+1]-1 + ld.binedges[i])
     end
