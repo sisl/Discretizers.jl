@@ -26,11 +26,11 @@ function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, cou
     n = length(binedges)
     n == length(counts)+1 || error("binedges must have exactly one more entry than counts!")
     
-    arr_x = Array(R, n+1)
+    arr_x = Array{R}(n+1)
     arr_x[1] = binedges[1]
     arr_x[2:n+1] = binedges
 
-    arr_y = Array(I, n+1)
+    arr_y = Array{I}(n+1)
     arr_y[1] = zero(I)
     arr_y[2:n] = counts
     arr_y[end] = zero(I)
@@ -41,11 +41,11 @@ function get_histogram_plot_arrays{R<:Real, F<:Real}(binedges::Vector{R}, pdfs::
     n = length(binedges)
     n == length(pdfs)+1 || error("binedges must have exactly one more entry than counts!")
     
-    arr_x = Array(R, n+1)
+    arr_x = Array{R}(n+1)
     arr_x[1] = binedges[1]
     arr_x[2:n+1] = binedges
 
-    arr_y = Array(F, n+1)
+    arr_y = Array{F}(n+1)
     arr_y[1] = zero(F)
     arr_y[2:n] = pdfs
     arr_y[end] = zero(F)
