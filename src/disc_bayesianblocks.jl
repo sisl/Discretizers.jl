@@ -10,7 +10,7 @@
 # Scargle 2012: http://adsabs.harvard.edu/abs/2012arXiv1207.5578S
 # Python implementation: https://github.com/astroML/astroML/blob/master/astroML/density_estimation/bayesian_blocks.py
 
-type DiscretizeBayesianBlocks <: DiscretizationAlgorithm
+struct DiscretizeBayesianBlocks <: DiscretizationAlgorithm
 end
 
 function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})

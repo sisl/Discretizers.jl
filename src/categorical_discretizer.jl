@@ -2,7 +2,7 @@
 # TODO(tim): support Nullable
 # TODO(tim): support default value for missing keys
 
-immutable CategoricalDiscretizer{N,D} <: AbstractDiscretizer{N,D}
+struct CategoricalDiscretizer{N,D} <: AbstractDiscretizer{N,D}
     n2d :: Dict{N,D}    # maps natural to discrete
     d2n :: Dict{D,N}    # maps discrete to natural
 end
@@ -17,7 +17,7 @@ end
 function CategoricalDiscretizer{N, D<:Integer}(data::AbstractArray{N}, ::Type{D}=Int)
     # build a label mapping N -> D <: Integer
     i = zero(D)
-    n2d = @compat Dict{N, D}()
+    n2d = Dict{N, D}()
     for x in data
         if !haskey(n2d,x)
             n2d[x] = (i += 1)
@@ -32,7 +32,7 @@ supports_decoding{N,D}(cd::CategoricalDiscretizer{N,D}, d::D) = 1 ≤ d ≤ nlab
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = cd.n2d[x]::D
 encode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.n2d[convert(N,x)]::D
 function encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray)
-    arr = Array(D, length(data))
+    arr = Array{D}(length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(cd, x)
     end
@@ -42,7 +42,7 @@ end
 decode{N,D}(cd::CategoricalDiscretizer{N,D}, x::D) = cd.d2n[x]::N
 decode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.d2n[convert(D,x)]::N
 function decode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D})
-    arr = Array(N, length(data))
+    arr = Array{N}(length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(cd, d)
     end

@@ -11,7 +11,7 @@
 
 const DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST = true
 
-immutable LinearDiscretizer{N<:Real, D<:Integer} <: AbstractDiscretizer{N,D}
+struct LinearDiscretizer{N<:Real, D<:Integer} <: AbstractDiscretizer{N,D}
     binedges :: Vector{N}   # list of bin edges, sorted smallest to largest
     nbins    :: Int
     i2d      :: Dict{Int,D} # maps bin index to discrete label
@@ -113,7 +113,7 @@ function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, x::N)
 end
 encode{N,D}(ld::LinearDiscretizer{N,D}, x) = encode(ld, convert(N, x))::D
 function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray)
-    arr = Array(D, length(data))
+    arr = Array{D}(length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(ld, x)
     end
@@ -182,7 +182,7 @@ decode{N<:Real,D<:Integer,I<:Integer}(ld::LinearDiscretizer{N,D}, d::I, method::
     decode(ld, convert(D,d), method)
 
 function decode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM)
-    arr = Array(N, length(data))
+    arr = Array{N}(length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(ld, d)
     end
@@ -191,18 +191,18 @@ end
 
 Base.max(ld::LinearDiscretizer) = ld.binedges[end]
 Base.min(ld::LinearDiscretizer) = ld.binedges[1]
-function extrema{N,D}(ld::LinearDiscretizer{N,D})
+function Base.extrema{N,D}(ld::LinearDiscretizer{N,D})
     lo  = ld.binedges[1]
     hi  = ld.binedges[end]
     (lo, hi)
 end
-function extrema{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}, d::D)
+function Base.extrema{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}, d::D)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
     (lo, hi)
 end
-function extrema{N<:Integer,D}(ld::LinearDiscretizer{N,D}, d::D)
+function Base.extrema{N<:Integer,D}(ld::LinearDiscretizer{N,D}, d::D)
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
@@ -221,7 +221,7 @@ nlabels(ld::LinearDiscretizer) = ld.nbins
 binedges(ld::LinearDiscretizer) = ld.binedges
 bincenters{N<:AbstractFloat,D}(ld::LinearDiscretizer{N,D}) = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
 function bincenters{N<:Integer,D}(ld::LinearDiscretizer{N,D})
-    retval = Array(Float64, ld.nbins)
+    retval = Array{Float64}(ld.nbins)
     for i = 1 : length(retval)-1
         retval[i] = 0.5(ld.binedges[i+1]-1 + ld.binedges[i])
     end

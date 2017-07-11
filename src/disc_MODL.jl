@@ -1,11 +1,11 @@
 using Base.Collections
 using DataStructures
 
-abstract DiscretizeMODL <: DiscretizationAlgorithm
+abstract type DiscretizeMODL <: DiscretizationAlgorithm end
 
-immutable DiscretizeMODL_Optimal <: DiscretizeMODL end
-immutable DiscretizeMODL_Greedy <: DiscretizeMODL end
-type DiscretizeMODL_PostGreedy <: DiscretizeMODL
+struct DiscretizeMODL_Optimal <: DiscretizeMODL end
+struct DiscretizeMODL_Greedy <: DiscretizeMODL end
+struct DiscretizeMODL_PostGreedy <: DiscretizeMODL
     max_bin_count :: Int
     DiscretizeMODL_PostGreedy(max_bin_count::Integer = 0) = new(round(Int, max_bin_count))
 end

@@ -1,5 +1,4 @@
-julia 0.5
+julia 0.6
 DataArrays 0.2.10
 StatsBase 0.8.0
-Compat 0.8.0
 DataStructures

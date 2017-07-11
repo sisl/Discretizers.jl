@@ -1,8 +1,6 @@
-VERSION ≥ v"0.4.0-dev+6521" && __precompile__(true)
+__precompile__(true)
 
 module Discretizers
-
-using Compat
 
 import Base: extrema
 import StatsBase: iqr, moment
@@ -52,8 +50,7 @@ export
     datalineardiscretizer, # build a linear discretizer which maps Inf to a bin
 
     # linear discretizer
-    extrema,            # (min,max) for bin or for entire set
-    totalwidth,         # total width of set, max-mina
+    totalwidth,        # total width of set, max-mina
     bincenters         # Vector{Float64} list of bin centers
 
 ### source files

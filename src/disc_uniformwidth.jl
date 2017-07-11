@@ -2,7 +2,7 @@
    DiscretizeUniformWidth(alg::Symbol)
 If `nbins` is a symbol, automatically determine the number of bins to use
 """
-type DiscretizeUniformWidth <: DiscretizationAlgorithm
+struct DiscretizeUniformWidth <: DiscretizationAlgorithm
     nbins :: Union{Int,Symbol}
 end
 

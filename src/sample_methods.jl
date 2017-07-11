@@ -1,7 +1,7 @@
-abstract AbstractSampleMethod
-immutable SampleUniform        <: AbstractSampleMethod end
-immutable SampleBinCenter      <: AbstractSampleMethod end
-immutable SampleUniformZeroBin <: AbstractSampleMethod end
+abstract type AbstractSampleMethod end
+struct SampleUniform        <: AbstractSampleMethod end
+struct SampleBinCenter      <: AbstractSampleMethod end
+struct SampleUniformZeroBin <: AbstractSampleMethod end
 
 const SAMPLE_UNIFORM          = SampleUniform()
 const SAMPLE_BIN_CENTER       = SampleBinCenter()
