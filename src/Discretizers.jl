@@ -27,10 +27,8 @@ export
     AbstractSampleMethod,
     SampleUniform,                    # sample uniform from bin bounds
     SampleBinCenter,                  # return bin center
-    SampleUniformZeroBin,             # return 0 if bin contains it, otherwise sample uniform
     SAMPLE_UNIFORM,
     SAMPLE_BIN_CENTER,
-    SAMPLE_UNIFORM_ZERO_BIN,
 
     # methods
     encode,             # map from natural to discretized state
