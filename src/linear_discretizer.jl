@@ -88,11 +88,21 @@ function encode{N,D<:Integer}(ld::LinearDiscretizer{N,D}, x::N)
     elseif x > ld.binedges[end]
         return ld.force_outliers_to_closest ? ld.i2d[ld.nbins] : throw(BoundsError())
     else
-        i = searchsortedfirst(ld.binedges, x) # index of first val in binedges ≥ x
-        if ld.binedges[i] != x
-            i -= 1
+
+        # run bisection search
+        binedges = ld.binedges
+        a, b = 1, length(binedges)
+        va, vb = binedges[a], binedges[b]
+        while b-a > 1
+            c = div(a+b, 2)
+            vc = binedges[c]
+            if x < vc
+                b, vb = c, vc
+            else
+                a, va = c, vc
+            end
         end
-        return ld.i2d[min(i, ld.nbins)]
+        return ld.i2d[a]
     end
 end
 encode{N,D}(ld::LinearDiscretizer{N,D}, x) = encode(ld, convert(N, x))::D
