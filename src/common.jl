@@ -19,15 +19,14 @@ function get_discretization_counts(disc::AbstractDiscretizer, data::AbstractArra
 end
 
 function get_discretization_counts{N, D, T<:AbstractDiscretizer{N, D}}(discs::Vector{T}, data::AbstractMatrix{N})
-    m = size(data, 1)
-    n = size(data, 2)
-    @assert length(discs) == n
+    nobservations, ndimensions = size(data)
+    @assert length(discs) == ndimensions
     
     nbins = Tuple(nlabels.(discs))
     counts = zeros(Int, nbins)
-    for i in 1:m  # for each data point
-        binaddress = zeros(D, n)
-        for j in 1:n  # for each dimension
+    for i in 1:nobservations  # for each data point
+        binaddress = zeros(D, ndimensions)
+        for j in 1:ndimensions  # for each dimension
             binaddress[j] = encode(discs[j], data[i, j])
         end
         counts[binaddress...] += 1
