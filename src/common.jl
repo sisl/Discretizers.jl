@@ -18,6 +18,23 @@ function get_discretization_counts(disc::AbstractDiscretizer, data::AbstractArra
     counts
 end
 
+function get_discretization_counts{N, D, T<:AbstractDiscretizer{N, D}}(discs::Vector{T}, data::AbstractMatrix{N})
+    nobservations, ndimensions = size(data)
+    @assert length(discs) == ndimensions
+    
+    nbins = Tuple(nlabels.(discs))
+    counts = zeros(Int, nbins)
+    for i in 1:nobservations  # for each data point
+        binaddress = zeros(D, ndimensions)
+        for j in 1:ndimensions  # for each dimension
+            binaddress[j] = encode(discs[j], data[i, j])
+        end
+        counts[binaddress...] += 1
+    end
+    
+    counts
+end
+
 function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, counts::AbstractVector{I})
     n = length(binedges)
     n == length(counts)+1 || error("binedges must have exactly one more entry than counts!")
