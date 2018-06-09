@@ -1,0 +1,10 @@
+desc = "Data discretization and label maps."
+keywords = ["discretize", "encode", "decode"]
+license = "MIT"
+name = "Pkg"
+uuid = "4294ff7c-1138-4580-9842-347236393098"
+version = "2.1.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"

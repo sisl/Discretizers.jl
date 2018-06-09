@@ -3,7 +3,7 @@ struct DiscretizeUniformCount <: DiscretizationAlgorithm
     nbins::Int
 end
 
-function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformCount, data::AbstractArray{N}) where {N<:AbstractFloat}
 
     nbins = alg.nbins
 
@@ -12,7 +12,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractA
 
     p = sortperm(data)
     counts_per_bin, remainder = div(n,nbins), rem(n,nbins)
-    retval = Array{N}(nbins+1)
+    retval = Array{N}(undef, nbins+1)
     retval[1] = data[p[1]]
     retval[end] = data[p[end]]
 
@@ -27,7 +27,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractA
 
     retval
 end
-function binedges{N<:Integer}(alg::DiscretizeUniformCount, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformCount, data::AbstractArray{N}) where {N<:Integer}
 
     nbins = alg.nbins
 
@@ -36,7 +36,7 @@ function binedges{N<:Integer}(alg::DiscretizeUniformCount, data::AbstractArray{N
 
     p = sortperm(data)
     counts_per_bin, remainder = div(n,nbins), rem(n,nbins)
-    retval = Array{N}(nbins+1)
+    retval = Array{N}(undef, nbins+1)
     retval[1] = data[p[1]]
     retval[end] = data[p[end]]
 
