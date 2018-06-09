@@ -31,7 +31,7 @@ function binedges(alg::DiscretizeBayesianBlocks, data::AbstractArray{N}) where {
 	if length(unique_data) == length(data)
 		nn_vec = ones(length(data))
 	else
-		nn_vec = convert(Array{Float64}, [length(findin(data, v)) for v in unique_data])
+		nn_vec = convert(Array{Float64}, [length(findall(in(v), data)) for v in unique_data])
 	end
 
 	count_vec = zeros(n)
