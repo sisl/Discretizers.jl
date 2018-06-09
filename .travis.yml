@@ -1,17 +1,18 @@
 language: julia
-sudo: required
-dist: trusty
+
 julia:
   - nightly
   - 0.7
+
 matrix:
   allow_failures:
     - julia: nightly
+
 notifications:
   email: false
 
-before_install:
-  - sudo apt-get -qq update
+before_script:
+  - export PATH=$HOME/.local/bin:$PATH
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
