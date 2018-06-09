@@ -17,7 +17,8 @@ before_script:
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --check-bounds=yes -e 'using UUIDs; write("Project.toml", replace(read("Project.toml", String), r"uuid = .*?\n" =>"uuid = \"$(uuid4())\""));
-                                 import Discretizers; Pkg.instantiate(); Pkg.test(; coverage=true)'
+                                 Pkg.test("Discretizers", coverage=true)'
+
 
 after_success:
   - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
