@@ -1,7 +1,7 @@
 desc = "Data discretization and label maps."
 keywords = ["discretize", "encode", "decode"]
 license = "MIT"
-name = "Pkg"
+name = "Discretizers"
 version = "2.1.0"
 uuid = "4294ff7c-1138-4580-9842-347236393098"
 
