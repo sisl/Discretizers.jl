@@ -16,8 +16,9 @@ before_script:
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'using UUIDs; write("Project.toml", replace(read("Project.toml", String), r"uuid = .*?\n" =>"uuid = \"$(uuid4())\"\n"));
-                                 import Discretizers; using Pkg; Pkg.add("StatsBase"); Pkg.test("Discretizers", coverage=true)'
+  - julia --check-bounds=yes -e 'using Pkg; Pkg.add("StatsBase");
+                                 using UUIDs; write("Project.toml", replace(read("Project.toml", String), r"uuid = .*?\n" =>"uuid = \"$(uuid4())\"\n"));
+                                 import Discretizers; Pkg.test("Discretizers", coverage=true)'
 
 
 after_success:
