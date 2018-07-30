@@ -10,10 +10,10 @@ struct DiscretizeMODL_PostGreedy <: DiscretizeMODL
     DiscretizeMODL_PostGreedy(max_bin_count::Integer = 0) = new(round(Int, max_bin_count))
 end
 
-function binedges{N<:Real, I<:Integer}(
+function binedges(
     alg             :: DiscretizeMODL,
     data_continuous :: AbstractArray{N},
-    data_class      :: AbstractArray{I})
+    data_class      :: AbstractArray{I}) where {N<:Real, I<:Integer}
 
     @assert(length(data_continuous)==length(data_class))
     p = sortperm(data_continuous)
@@ -30,10 +30,10 @@ function binedges{N<:Real, I<:Integer}(
     end
 end
 
-function MODL_value2_oneintval{T<:AbstractFloat, S<:Integer}(
+function MODL_value2_oneintval(
     continuous_ij  :: AbstractArray{T},
     class_value_ij :: AbstractArray{S},
-    class_uniq     :: AbstractArray{S})
+    class_uniq     :: AbstractArray{S}) where {T<:AbstractFloat, S<:Integer}
 
     n = length(continuous_ij)
     J = length(class_uniq)
@@ -50,10 +50,10 @@ function MODL_value2_oneintval{T<:AbstractFloat, S<:Integer}(
     return first_part+second_part
 end
 
-function optimal_result{T<:AbstractFloat, S<:Integer}(
+function optimal_result(
     continuous      :: AbstractArray{T},
     discrete_target :: AbstractArray{S}
-    )
+    ) where {T<:AbstractFloat, S<:Integer}
 
     n = length(continuous)
 
@@ -123,10 +123,10 @@ function optimal_result{T<:AbstractFloat, S<:Integer}(
     return bin_edge_value
 end
 
-function merge_adj_intval{S<:Integer}(
+function merge_adj_intval(
     A_distr   :: AbstractArray{S}, # Note(Yi-Chun): Distribution of class values in A
     B_distr   :: AbstractArray{S}  # Note(Yi-Chun): Distribution of class values in B
-    )
+    ) where S<:Integer
 
     @assert(length(A_distr) == length(B_distr))
     J = length(B_distr)
@@ -144,9 +144,9 @@ function merge_adj_intval{S<:Integer}(
     Delta
 end
 
-function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
+function greedy_merge_index(
     continuous  :: AbstractArray{T},
-    class_value :: AbstractArray{S})
+    class_value :: AbstractArray{S}) where {T<:AbstractFloat,S<:Integer}
 
     @assert(length(continuous) == length(class_value))
 
@@ -322,9 +322,9 @@ function greedy_merge_index{T<:AbstractFloat,S<:Integer}(
     end
 end
 
-function greedy_merge{T<:AbstractFloat,S<:Integer}(
+function greedy_merge(
     continuous  :: AbstractArray{T},
-    class_value :: AbstractArray{S})
+    class_value :: AbstractArray{S}) where {T<:AbstractFloat,S<:Integer}
     binedges = greedy_merge_index(continuous,class_value)
     append!(binedges,[length(continuous)])
     n = length(binedges)
@@ -389,11 +389,11 @@ function methods_split(continuous,class_value,distr,i,j,uniq_class,I)
     return (current_MODL,current_split,current_distr_A,current_distr_B)
 end
 
-function methods_merge{S<:Integer}(
+function methods_merge(
     A_distr   :: AbstractArray{S},
     B_distr   :: AbstractArray{S},
     N,
-    I)
+    I) where S<:Integer
     # Note(Yi-Chun): This function is similar to the previous function merge_adj_intval.
     #                The only different part is the difference of MODL value after merging.
     @assert(length(A_distr) == length(B_distr))
@@ -490,10 +490,10 @@ end
 insert_and_dedup!(v::Vector, x) = (splice!(v, searchsorted(v,x), [x]); v)
 
 
-function uncondi_greedy_merge_index{T<:AbstractFloat,S<:Integer}(
+function uncondi_greedy_merge_index(
     continuous  :: AbstractArray{T},
     class_value :: AbstractArray{S}
-    )
+    ) where {T<:AbstractFloat,S<:Integer}
     # Note(Yi-Chun): This function processes the unconditional bin merge, Adapted from the function greedy_merge
     @assert(length(continuous) == length(class_value))
 

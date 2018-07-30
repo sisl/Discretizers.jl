@@ -6,7 +6,7 @@ struct DiscretizeUniformWidth <: DiscretizationAlgorithm
     nbins :: Union{Int,Symbol}
 end
 
-function get_nbins{N<:Real}(alg::Symbol, data::AbstractArray{N})
+function get_nbins(alg::Symbol, data::AbstractArray{N}) where N<:Real
 
     n = length(data)
 
@@ -52,7 +52,7 @@ function get_nbins{N<:Real}(alg::Symbol, data::AbstractArray{N})
     nbins
 end
 
-function binedges{N<:AbstractFloat}(alg::DiscretizeUniformWidth, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where N<:AbstractFloat
     lo, hi = extrema(data)
     @assert(hi > lo)
 
@@ -60,7 +60,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeUniformWidth, data::AbstractA
 
     convert(Vector{N}, collect(linspace(lo, hi, nbins+1)))
 end
-function binedges{N<:Integer}(alg::DiscretizeUniformWidth, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where N<:Integer
     lo, hi = extrema(data)
     @assert(hi > lo)
     collect(linspace(lo, hi, alg.nbins+1))

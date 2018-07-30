@@ -3,7 +3,7 @@ struct DiscretizeUniformCount <: DiscretizationAlgorithm
     nbins::Int
 end
 
-function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformCount, data::AbstractArray{N}) where N<:AbstractFloat
 
     nbins = alg.nbins
 
@@ -27,7 +27,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeUniformCount, data::AbstractA
 
     retval
 end
-function binedges{N<:Integer}(alg::DiscretizeUniformCount, data::AbstractArray{N})
+function binedges(alg::DiscretizeUniformCount, data::AbstractArray{N}) where N<:Integer
 
     nbins = alg.nbins
 

@@ -8,7 +8,7 @@ using Base.Test
 
 using Discretizers
 
-function array_matches{S<:Integer, T<:Integer}(arr::AbstractVector{S}, arr2::AbstractVector{T})
+function array_matches(arr::AbstractVector{S}, arr2::AbstractVector{T}) where {S<:Integer, T<:Integer}
     n = length(arr)
     @assert(length(arr2) == n)
     for i = 1 : n
@@ -18,7 +18,7 @@ function array_matches{S<:Integer, T<:Integer}(arr::AbstractVector{S}, arr2::Abs
     end
     true
 end
-function array_matches{S<:Real, T<:Real}(arr::AbstractVector{S}, arr2::AbstractVector{T}, abs_tolerance::AbstractFloat=eps(Float64))
+function array_matches(arr::AbstractVector{S}, arr2::AbstractVector{T}, abs_tolerance::AbstractFloat=eps(Float64)) where {S<:Real, T<:Real}
     n = length(arr)
     @assert(length(arr2) == n)
     for i = 1 : n

@@ -7,14 +7,14 @@ struct CategoricalDiscretizer{N,D} <: AbstractDiscretizer{N,D}
     d2n :: Dict{D,N}    # maps discrete to natural
 end
 
-function CategoricalDiscretizer{N,D}(natural_to_discrete::Dict{N,D})
+function CategoricalDiscretizer(natural_to_discrete::Dict{N,D}) where {N,D}
     d2n = Dict{D,N}()
     for (k,v) in natural_to_discrete
         d2n[v] = k
     end
     CategoricalDiscretizer{N,D}(natural_to_discrete, d2n)
 end
-function CategoricalDiscretizer{N, D<:Integer}(data::AbstractArray{N}, ::Type{D}=Int)
+function CategoricalDiscretizer(data::AbstractArray{N}, ::Type{D}=Int) where {N, D<:Integer}
     # build a label mapping N -> D <: Integer
     i = zero(D)
     n2d = Dict{N, D}()
@@ -26,12 +26,12 @@ function CategoricalDiscretizer{N, D<:Integer}(data::AbstractArray{N}, ::Type{D}
     CategoricalDiscretizer(n2d)
 end
 
-supports_encoding{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = haskey(cd.n2d, x)
-supports_decoding{N,D}(cd::CategoricalDiscretizer{N,D}, d::D) = 1 ≤ d ≤ nlabels(cd)
+supports_encoding(cd::CategoricalDiscretizer{N,D}, x::N) where {N,D} = haskey(cd.n2d, x)
+supports_decoding(cd::CategoricalDiscretizer{N,D}, d::D) where {N,D} = 1 ≤ d ≤ nlabels(cd)
 
-encode{N,D}(cd::CategoricalDiscretizer{N,D}, x::N) = cd.n2d[x]::D
-encode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.n2d[convert(N,x)]::D
-function encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray)
+encode(cd::CategoricalDiscretizer{N,D}, x::N) where {N,D} = cd.n2d[x]::D
+encode(cd::CategoricalDiscretizer{N,D}, x) where {N,D} = cd.n2d[convert(N,x)]::D
+function encode(cd::CategoricalDiscretizer{N,D}, data::AbstractArray) where {N,D}
     arr = Array{D}(length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(cd, x)
@@ -39,9 +39,9 @@ function encode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray)
     reshape(arr, size(data))
 end
 
-decode{N,D}(cd::CategoricalDiscretizer{N,D}, x::D) = cd.d2n[x]::N
-decode{N,D}(cd::CategoricalDiscretizer{N,D}, x) = cd.d2n[convert(D,x)]::N
-function decode{N,D}(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D})
+decode(cd::CategoricalDiscretizer{N,D}, x::D) where {N,D} = cd.d2n[x]::N
+decode(cd::CategoricalDiscretizer{N,D}, x) where {N,D} = cd.d2n[convert(D,x)]::N
+function decode(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D}) where {N,D}
     arr = Array{N}(length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(cd, d)

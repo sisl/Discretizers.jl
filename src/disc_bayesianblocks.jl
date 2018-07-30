@@ -13,7 +13,7 @@
 struct DiscretizeBayesianBlocks <: DiscretizationAlgorithm
 end
 
-function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})
+function binedges(alg::DiscretizeBayesianBlocks, data::AbstractArray{N}) where N<:AbstractFloat
 
 	unique_data = unique(data)
 	unique_data = sort(unique_data)
@@ -68,7 +68,7 @@ function binedges{N<:AbstractFloat}(alg::DiscretizeBayesianBlocks, data::Abstrac
 	edges[change_points]
 
 end
-function binedges{N<:Integer}(alg::DiscretizeBayesianBlocks, data::AbstractArray{N})
+function binedges(alg::DiscretizeBayesianBlocks, data::AbstractArray{N}) where N<:Integer
 
 	data = convert(Array{typeof(0.0)}, data)
 	binedges(alg, data)
