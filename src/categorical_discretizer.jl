@@ -30,9 +30,10 @@ supports_encoding(cd::CategoricalDiscretizer{N,D}, x::N) where {N,D} = haskey(cd
 supports_decoding(cd::CategoricalDiscretizer{N,D}, d::D) where {N,D} = 1 ≤ d ≤ nlabels(cd)
 
 encode(cd::CategoricalDiscretizer{N,D}, x::N) where {N,D} = cd.n2d[x]::D
+encode(cd::CategoricalDiscretizer{Symbol,D}, x::AbstractString) where {D} = cd.n2d[Symbol(x)]::D
 encode(cd::CategoricalDiscretizer{N,D}, x) where {N,D} = cd.n2d[convert(N,x)]::D
 function encode(cd::CategoricalDiscretizer{N,D}, data::AbstractArray) where {N,D}
-    arr = Array{D}(length(data))
+    arr = Array{D}(undef, length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(cd, x)
     end
@@ -42,7 +43,7 @@ end
 decode(cd::CategoricalDiscretizer{N,D}, x::D) where {N,D} = cd.d2n[x]::N
 decode(cd::CategoricalDiscretizer{N,D}, x) where {N,D} = cd.d2n[convert(D,x)]::N
 function decode(cd::CategoricalDiscretizer{N,D}, data::AbstractArray{D}) where {N,D}
-    arr = Array{N}(length(data))
+    arr = Array{N}(undef, length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(cd, d)
     end

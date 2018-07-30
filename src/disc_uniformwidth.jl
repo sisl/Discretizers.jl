@@ -3,10 +3,10 @@
 If `nbins` is a symbol, automatically determine the number of bins to use
 """
 struct DiscretizeUniformWidth <: DiscretizationAlgorithm
-    nbins :: Union{Int,Symbol}
+    nbins::Union{Int,Symbol}
 end
 
-function get_nbins(alg::Symbol, data::AbstractArray{N}) where N<:Real
+function get_nbins(alg::Symbol, data::AbstractArray{N}) where {N<:Real}
 
     n = length(data)
 
@@ -22,7 +22,7 @@ function get_nbins(alg::Symbol, data::AbstractArray{N}) where N<:Real
         nbins = ceil(Int, log(2,n)) + 1
     elseif alg == :rice
         # Estimator does not take variability into account, only data size. Commonly overestimates number of bins required.
-        nbins = ceil(Int, 2*cbrt(n))
+        nbins = ceil(Int, 2cbrt(n))
     elseif alg == :doane
         # An improved version of Sturges’ estimator that works better with non-normal datasets.
         g₁ = moment(data, 3)
@@ -31,18 +31,18 @@ function get_nbins(alg::Symbol, data::AbstractArray{N}) where N<:Real
     elseif alg == :scott
         # Less robust estimator that that takes into account data variability and data size.
         σ = std(data)
-        binwidth = 3.5*σ/cbrt(n)
+        binwidth = 3.5σ/cbrt(n)
         lo, hi = extrema(data)
         nbins = ceil(Int, (hi - lo)/binwidth)
     elseif alg == :fd # Freedman Diaconis Estimator
         # Robust (resilient to outliers) estimator that takes into account data variability and data size
-        binwidth = 2*iqr(data)/cbrt(n)
+        binwidth = 2iqr(data)/cbrt(n)
         lo, hi = extrema(data)
         nbins = ceil(Int, (hi - lo)/binwidth)
     else # alg == :auto
         # Maximum of the ‘sturges’ and ‘fd’ estimators. Provides good all round performance
 
-        binwidth = 2*iqr(data)/cbrt(n)
+        binwidth = 2iqr(data)/cbrt(n)
         lo, hi = extrema(data)
         nbins_fd = ceil(Int, (hi - lo)/binwidth)
         nbins_sturges = ceil(Int, log(2,n)) + 1
@@ -52,16 +52,16 @@ function get_nbins(alg::Symbol, data::AbstractArray{N}) where N<:Real
     nbins
 end
 
-function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where N<:AbstractFloat
+function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where {N<:AbstractFloat}
     lo, hi = extrema(data)
     @assert(hi > lo)
 
     nbins = (isa(alg.nbins, Symbol) ? get_nbins(alg.nbins, data) : alg.nbins)::Int
 
-    convert(Vector{N}, collect(linspace(lo, hi, nbins+1)))
+    convert(Vector{N}, collect(range(lo, stop=hi, length=nbins+1)))
 end
-function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where N<:Integer
+function binedges(alg::DiscretizeUniformWidth, data::AbstractArray{N}) where {N<:Integer}
     lo, hi = extrema(data)
     @assert(hi > lo)
-    collect(linspace(lo, hi, alg.nbins+1))
+    collect(range(lo, stop=hi, length=alg.nbins+1))
 end

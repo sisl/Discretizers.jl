@@ -14,7 +14,7 @@ to a discrete bin, but otherwise is a linear discretizer
 function datalineardiscretizer(binedges::Vector{Float64}, ::Type{D}=Int;
     missing_key::Float64=Inf,
     force_outliers_to_closest::Bool=DEFAULT_LIN_DISC_FORCE_OUTLIERS_TO_CLOSEST,
-    ) where D<:Integer
+    ) where {D<:Integer}
 
     categorical = CategoricalDiscretizer(Dict{Float64, Int}(missing_key=>1))
     linear = LinearDiscretizer(binedges, D, force_outliers_to_closest=force_outliers_to_closest)
@@ -41,7 +41,7 @@ function encode(disc::HybridDiscretizer{N,D}, x::N) where {N,D<:Integer}
 end
 encode(disc::HybridDiscretizer{N,D}, x) where {N,D} = encode(disc, convert(N, x))::D
 function encode(disc::HybridDiscretizer{N,D}, data::AbstractArray) where {N,D<:Integer}
-    arr = Array{D}(length(data))
+    arr = Vector{D}(undef, length(data))
     for (i,x) in enumerate(data)
         arr[i] = encode(disc, x)
     end
@@ -60,7 +60,7 @@ decode(disc::HybridDiscretizer{N,D}, d::E, method::AbstractSampleMethod=SAMPLE_U
     decode(disc, convert(D, d), method)
 
 function decode(disc::HybridDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM) where {N,D<:Integer}
-    arr = Array{N}(length(data))
+    arr = Vector{N}(undef, length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(disc, d)
     end
@@ -69,12 +69,12 @@ end
 
 Base.max(disc::HybridDiscretizer) = Base.max(disc.lin)
 Base.min(disc::HybridDiscretizer) = Base.min(disc.lin)
-Base.extrema(disc::HybridDiscretizer{N,D}) where {N,D} = extrema(disc.lin)
+Base.extrema(disc::HybridDiscretizer) = extrema(disc.lin)
 Base.extrema(disc::HybridDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D} = extrema(disc.lin, d)
 Base.extrema(disc::HybridDiscretizer{N,D}, d::D) where {N<:Integer,D} = extrema(disc.lin, d)
 totalwidth(disc::HybridDiscretizer) = totalwidth(disc.lin)
 
 nlabels(disc::HybridDiscretizer) = disc.lin.nbins + nlabels(disc.cat)
-bincenters(disc::HybridDiscretizer{N,D}) where {N<:Real,D} = bincenters(disc.lin)
+bincenters(disc::HybridDiscretizer) = bincenters(disc.lin)
 binwidth(disc::HybridDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D} = binwidth(disc.lin, d)
 binwidths(disc::HybridDiscretizer{N,D}) where {N<:AbstractFloat,D} = binwidths(disc.lin)

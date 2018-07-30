@@ -1,32 +1,29 @@
-using Base.Test
-
-# using Lint
-# lintpkg( "Discretizers" )
-# @test isempty(lintpkg( "Discretizers", returnMsgs=true))
-
-################
-
+using Test
 using Discretizers
 
 function array_matches(arr::AbstractVector{S}, arr2::AbstractVector{T}) where {S<:Integer, T<:Integer}
     n = length(arr)
-    @assert(length(arr2) == n)
-    for i = 1 : n
-        if arr[i] != arr2[i]
+    if length(arr2) != n
+        return false
+    end
+    for (a,b) in zip(arr, arr2)
+        if a != b
             return false
         end
     end
-    true
+    return true
 end
 function array_matches(arr::AbstractVector{S}, arr2::AbstractVector{T}, abs_tolerance::AbstractFloat=eps(Float64)) where {S<:Real, T<:Real}
     n = length(arr)
-    @assert(length(arr2) == n)
-    for i = 1 : n
+    if length(arr2) != n
+        return false
+    end
+    for i in 1 : n
         if abs(arr[i] - arr2[i]) > abs_tolerance
             return false
         end
     end
-    true
+    return true
 end
 
 

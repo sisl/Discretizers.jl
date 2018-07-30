@@ -1,4 +1,3 @@
-using Base.Collections
 using DataStructures
 
 abstract type DiscretizeMODL <: DiscretizationAlgorithm end
@@ -13,7 +12,8 @@ end
 function binedges(
     alg             :: DiscretizeMODL,
     data_continuous :: AbstractArray{N},
-    data_class      :: AbstractArray{I}) where {N<:Real, I<:Integer}
+    data_class      :: AbstractArray{I},
+    ) where {N<:Real, I<:Integer}
 
     @assert(length(data_continuous)==length(data_class))
     p = sortperm(data_continuous)
@@ -33,18 +33,19 @@ end
 function MODL_value2_oneintval(
     continuous_ij  :: AbstractArray{T},
     class_value_ij :: AbstractArray{S},
-    class_uniq     :: AbstractArray{S}) where {T<:AbstractFloat, S<:Integer}
+    class_uniq     :: AbstractArray{S},
+    ) where {T<:AbstractFloat, S<:Integer}
 
     n = length(continuous_ij)
     J = length(class_uniq)
 
-    first_part = lfact(n+J-1) - lfact(J-1) - lfact(n)
-    second_part = lfact(n)
-    # Note(Yi-Chun): lfact(n) is log(n!)
+    first_part = lfactorial(n+J-1) - lfactorial(J-1) - lfactorial(n)
+    second_part = lfactorial(n)
+    # Note(Yi-Chun): lfactorial(n) is log(n!)
 
     for J_index = 1:J
             n_J = count(x->x==class_uniq[J_index],class_value_ij)
-            second_part = second_part - lfact(n_J)
+            second_part = second_part - lfactorial(n_J)
     end
 
     return first_part+second_part
@@ -57,8 +58,8 @@ function optimal_result(
 
     n = length(continuous)
 
-    Disc_ijk_retval = Array{Array}(n,n)
-    Disc_ijk_MODL_value = Array{AbstractFloat}(n,n)
+    Disc_ijk_retval = Array{Array}(undef,n,n)
+    Disc_ijk_MODL_value = Array{AbstractFloat}(undef,n,n)
     for j = 1:n
             for k = 1:n
                     if k > j
@@ -100,15 +101,15 @@ function optimal_result(
     full_length_k_intval = copy(Disc_ijk_MODL_value[n,:])
 
     for l = 1:n
-        full_length_k_intval[l] += lfact(n+l-1) - lfact(l-1) - lfact(n)
+        full_length_k_intval[l] += lfactorial(n+l-1) - lfactorial(l-1) - lfactorial(n)
     end
 
-    desired_intval_number = indmin(full_length_k_intval)
+    desired_intval_number = argmin(full_length_k_intval)
 
     bin_edges_index = Disc_ijk_retval[n,desired_intval_number]
     bin_edges = append!([1],bin_edges_index)
 
-    bin_edge_value = Array{AbstractFloat}(length(bin_edges))
+    bin_edge_value = Vector{AbstractFloat}(undef,length(bin_edges))
 
     for index = 1 : length(bin_edge_value)
         if index == 1
@@ -124,9 +125,9 @@ function optimal_result(
 end
 
 function merge_adj_intval(
-    A_distr   :: AbstractArray{S}, # Note(Yi-Chun): Distribution of class values in A
-    B_distr   :: AbstractArray{S}  # Note(Yi-Chun): Distribution of class values in B
-    ) where S<:Integer
+    A_distr :: AbstractArray{S}, # Note(Yi-Chun): Distribution of class values in A
+    B_distr :: AbstractArray{S}  # Note(Yi-Chun): Distribution of class values in B
+    ) where {S<:Integer}
 
     @assert(length(A_distr) == length(B_distr))
     J = length(B_distr)
@@ -134,19 +135,20 @@ function merge_adj_intval(
     n_A = sum(A_distr)
     n_B = sum(B_distr)
 
-    Delta = lfact(n_A+n_B+J-1) + lfact(J-1) - lfact(n_A+J-1) - lfact(n_B+J-1)
+    Delta = lfactorial(n_A+n_B+J-1) + lfactorial(J-1) - lfactorial(n_A+J-1) - lfactorial(n_B+J-1)
 
     for j = 1:J
         n_A_J = A_distr[j]
         n_B_J = B_distr[j]
-        Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
+        Delta = Delta - lfactorial(n_A_J+n_B_J) + lfactorial(n_A_J) + lfactorial(n_B_J)
     end
     Delta
 end
 
 function greedy_merge_index(
     continuous  :: AbstractArray{T},
-    class_value :: AbstractArray{S}) where {T<:AbstractFloat,S<:Integer}
+    class_value :: AbstractArray{S},
+    ) where {T<:AbstractFloat,S<:Integer}
 
     @assert(length(continuous) == length(class_value))
 
@@ -165,12 +167,13 @@ function greedy_merge_index(
     adj_for_intval = Dict()
     # Note(Yi-Chun): This dictionary contains the two adjacent interval for interval i
 
-    MODL = log(n) + lfact(2n-1) - lfact(n-1) - lfact(n) + n*log(J-1)
+    MODL = log(n) + lfactorial(2n-1) - lfactorial(n-1) - lfactorial(n) + n*log(J-1)
     # Note(Yi-Chun): Intial MODL when each attribute is treated as a single bin
 
     for i = 1:n-1
         A_Distrib_in_intval = zeros(Int64,J)
-        A_value_index = findfirst(all_class_value,class_value[i])
+        A_value_index = something(findfirst(isequal(class_value[i]), all_class_value), 0)
+
         A_Distrib_in_intval[A_value_index] = 1
         # Note(Yi-Chun): Set up distribution in each bin as [0,0,..0,1,0,..0]
         distr_in_intval[i] = A_Distrib_in_intval
@@ -189,7 +192,8 @@ function greedy_merge_index(
         end
 
         B_Distrib_in_intval = zeros(Int64,J)
-        B_value_index = findfirst(all_class_value,class_value[i+1])
+        B_value_index = something(findfirst(isequal(class_value[i+1]), all_class_value), 0)
+
         B_Distrib_in_intval[B_value_index] = 1
         if i == (n-1) # Note(Yi-Chun): The adjacents of the last interval are n-2 and n-1
             distr_in_intval[n] = B_Distrib_in_intval
@@ -300,7 +304,8 @@ function greedy_merge_index(
             MODL = MODL + DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
             n_intval = n_intval-1
             removed = DataStructures.dequeue!(pq)
-            prior = binedges[findfirst(binedges,removed)-1]
+            prior = binedges[something(findfirst(isequal(removed), binedges), 0)-1]
+
             Merge_distr = distr_in_intval[removed] + distr_in_intval[prior]
             distr_in_intval[prior] = Merge_distr
             delete!(adj_for_intval,removed)
@@ -324,11 +329,13 @@ end
 
 function greedy_merge(
     continuous  :: AbstractArray{T},
-    class_value :: AbstractArray{S}) where {T<:AbstractFloat,S<:Integer}
+    class_value :: AbstractArray{S},
+    ) where {T<:AbstractFloat,S<:Integer}
+
     binedges = greedy_merge_index(continuous,class_value)
     append!(binedges,[length(continuous)])
     n = length(binedges)
-    bin_edges = Array{Float64}(n)
+    bin_edges = Vector{Float64}(undef,n)
     for i = 2: n-1
         binedges[i] = binedges[i]-1
     end
@@ -365,13 +372,13 @@ function methods_split(continuous,class_value,distr,i,j,uniq_class,I)
     current_distr_B = distr_ij
 
     for n_A_end = 1:n-1
-        distr_A[findfirst(uniq_class,class_ij[n_A_end])] += 1
+        distr_A[something(findfirst(isequal(class_ij[n_A_end]), uniq_class),0)] += 1
         distr_B = distr_ij - distr_A
 
-        Del = lfact(n_A_end+J-1)+lfact(n-n_A_end+J-1)-lfact(n+J-1)-lfact(J-1)
+        Del = lfactorial(n_A_end+J-1)+lfactorial(n-n_A_end+J-1)-lfactorial(n+J-1)-lfactorial(J-1)
 
         for j = 1:J
-            Del += lfact(distr_A[j]+distr_B[j])-lfact(distr_A[j])-lfact(distr_B[j])
+            Del += lfactorial(distr_A[j]+distr_B[j])-lfactorial(distr_A[j])-lfactorial(distr_B[j])
         end
 
 
@@ -393,18 +400,20 @@ function methods_merge(
     A_distr   :: AbstractArray{S},
     B_distr   :: AbstractArray{S},
     N,
-    I) where S<:Integer
+    I,
+    ) where {S<:Integer}
+
     # Note(Yi-Chun): This function is similar to the previous function merge_adj_intval.
     #                The only different part is the difference of MODL value after merging.
     @assert(length(A_distr) == length(B_distr))
     J = length(B_distr)
     n_A = sum(A_distr)
     n_B = sum(B_distr)
-    Delta = lfact(n_A+n_B+J-1) + lfact(J-1) - lfact(n_A+J-1) - lfact(n_B+J-1)
+    Delta = lfactorial(n_A+n_B+J-1) + lfactorial(J-1) - lfactorial(n_A+J-1) - lfactorial(n_B+J-1)
     for j = 1:J
         n_A_J = A_distr[j]
         n_B_J = B_distr[j]
-        Delta = Delta - lfact(n_A_J+n_B_J) + lfact(n_A_J) + lfact(n_B_J)
+        Delta = Delta - lfactorial(n_A_J+n_B_J) + lfactorial(n_A_J) + lfactorial(n_B_J)
     end
     Delta += log((I-1)/(N+I-1))
     return Delta
@@ -506,13 +515,13 @@ function uncondi_greedy_merge_index(
     distr_in_intval = Dict()
     adj_for_intval = Dict()
 
-    MODL = log(n) + lfact(2n-1) - lfact(n-1) - lfact(n) + n*log(J-1)
+    MODL = log(n) + lfactorial(2n-1) - lfactorial(n-1) - lfactorial(n) + n*log(J-1)
 
     total_distrib = zeros(Int64,J)
 
     for i = 1:n-1
         A_Distrib_in_intval = zeros(Int64,J)
-        A_value_index = findfirst(all_class_value,class_value[i])
+        A_value_index = something(findfirst(isequal(class_value[i]), all_class_value), 0)
         A_Distrib_in_intval[A_value_index] = 1
         distr_in_intval[i] = A_Distrib_in_intval
 
@@ -529,7 +538,7 @@ function uncondi_greedy_merge_index(
         total_distrib += A_Distrib_in_intval
 
         B_Distrib_in_intval = zeros(Int64,J)
-        B_value_index = findfirst(all_class_value,class_value[i+1])
+        B_value_index = something(findfirst(isequal(class_value[i+1]), all_class_value), 0)
         B_Distrib_in_intval[B_value_index] = 1
         if i == (n-1)
             distr_in_intval[n] = B_Distrib_in_intval
@@ -648,7 +657,7 @@ function uncondi_greedy_merge_index(
             MODL = MODL + DataStructures.peek(pq)[2] + log((n_intval-1)/(n+n_intval-1))
             n_intval = n_intval-1
             removed = DataStructures.dequeue!(pq)
-            prior = binedges[findfirst(binedges,removed)-1]
+            prior = binedges[something(findfirst(isequal(removed), binedges),0)-1]
             Merge_distr = distr_in_intval[removed] + distr_in_intval[prior]
             distr_in_intval[prior] = Merge_distr
             delete!(adj_for_intval,removed)
@@ -709,7 +718,7 @@ function post_greedy_index(continuous,class_value,upper_bound = 0)
         append!(bins,[N+1])
         distr = Dict()
         for bin_index = 1 : I
-            distr[bins[bin_index]] = Array{Int64}(J)
+            distr[bins[bin_index]] = Vector{Int64}(undef,J)
             for j_index = 1 : J
                 n_J = count(x->x==uniq_class[j_index],class_value[bins[bin_index]:bins[bin_index+1]-1])
                 distr[bins[bin_index]][j_index] = n_J
@@ -876,7 +885,7 @@ end
 function post_greedy_result(continuous,class_value,upper_bound=0)
 
     binedges = post_greedy_index(continuous,class_value,upper_bound)
-    bins = Array{Float64}(length(binedges))
+    bins = Vector{Float64}(undef,length(binedges))
     for i = 1 : length(binedges)
         if i==1
             bins[1] = continuous[1]
