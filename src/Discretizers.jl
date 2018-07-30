@@ -4,6 +4,8 @@ module Discretizers
 
 import Base: extrema
 import StatsBase: iqr, moment
+import Statistics: std
+import SpecialFunctions: lfact
 
 export
     # generic types
@@ -68,3 +70,4 @@ include("disc_bayesianblocks.jl")
 
 end # module
 
+println("Hi")
