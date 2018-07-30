@@ -4,6 +4,8 @@ module Discretizers
 
 import Base: extrema
 import StatsBase: iqr, moment
+import Statistics: std
+import SpecialFunctions: lfactorial
 
 export
     # generic types
@@ -61,12 +63,9 @@ include("categorical_discretizer.jl")
 include("linear_discretizer.jl")
 include("hybrid_discretizer.jl")
 
-
 include("disc_uniformwidth.jl")
 include("disc_uniformcount.jl")
 include("disc_MODL.jl")
 include("disc_bayesianblocks.jl")
 
-
 end # module
-

@@ -37,7 +37,7 @@ class_value = [1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,2,2,2,2,2];
 
 #Case6
 continuous = collect(1.0:1.0:100.0)
-class_value = Array{Int64}(100)
+class_value = Array{Int64}(undef, 100)
 for i in 1 : 100
     class_value[i] = div((i-1),20)
 end

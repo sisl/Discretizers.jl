@@ -3,8 +3,8 @@ abstract type AbstractDiscretizer{N,D} end
     # N indicates the decoded, or natural type
     # D indicates the encoded, or discrete type
 
-encoded_type{N,D}(::AbstractDiscretizer{N,D}) = D
-decoded_type{N,D}(::AbstractDiscretizer{N,D}) = N
+encoded_type(::AbstractDiscretizer{N,D}) where {N,D} = D
+decoded_type(::AbstractDiscretizer{N,D}) where {N,D} = N
 
 
 # DiscretizationAlgorithm
@@ -18,10 +18,10 @@ function get_discretization_counts(disc::AbstractDiscretizer, data::AbstractArra
     counts
 end
 
-function get_discretization_counts{N, D, T<:AbstractDiscretizer{N, D}}(discs::Vector{T}, data::AbstractMatrix{N})
+function get_discretization_counts(discs::Vector{T}, data::AbstractMatrix{N}) where {N, D, T<:AbstractDiscretizer{N, D}}
     nobservations, ndimensions = size(data)
     @assert length(discs) == ndimensions
-    
+
     nbins = Tuple(nlabels.(discs))
     counts = zeros(Int, nbins)
     for i in 1:nobservations  # for each data point
@@ -31,11 +31,11 @@ function get_discretization_counts{N, D, T<:AbstractDiscretizer{N, D}}(discs::Ve
         end
         counts[binaddress...] += 1
     end
-    
+
     counts
 end
 
-function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, counts::AbstractVector{I})
+function get_histogram_plot_arrays(binedges::Vector{R}, counts::AbstractVector{I}) where {R<:Real, I<:Integer}
     n = length(binedges)
     n == length(counts)+1 || error("binedges must have exactly one more entry than counts!")
 
@@ -50,7 +50,7 @@ function get_histogram_plot_arrays{R<:Real, I<:Integer}(binedges::Vector{R}, cou
 
     (arr_x, arr_y)
 end
-function get_histogram_plot_arrays{R<:Real, F<:Real}(binedges::Vector{R}, pdfs::AbstractVector{F})
+function get_histogram_plot_arrays(binedges::Vector{R}, pdfs::AbstractVector{F}) where {R<:Real, F<:Real}
     n = length(binedges)
     n == length(pdfs)+1 || error("binedges must have exactly one more entry than counts!")
 
