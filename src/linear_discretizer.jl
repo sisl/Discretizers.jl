@@ -80,7 +80,7 @@ function supports_encoding(ld::LinearDiscretizer{N,D}, x::N) where {N<:Real,D<:I
 end
 supports_decoding(ld::LinearDiscretizer{N,D}, d::D) where {N<:Real,D<:Integer} = 1 ≤ d ≤ ld.nbins
 
-function encode(ld::LinearDiscretizer{N,D}, x::N) where {N,D<:Integer}
+function encode(ld::LinearDiscretizer{N,D}, x::N) where {N<:Real,D<:Integer}
     !isnan(x) || error("cannot encode NaN values")
 
     if x < ld.binedges[1]
@@ -105,8 +105,8 @@ function encode(ld::LinearDiscretizer{N,D}, x::N) where {N,D<:Integer}
         return ld.i2d[a]
     end
 end
-encode(ld::LinearDiscretizer{N,D}, x) where {N,D} = encode(ld, convert(N, x))::D
-function encode(ld::LinearDiscretizer{N,D}, data::AbstractArray) where {N,D<:Integer}
+encode(ld::LinearDiscretizer{N,D}, x) where {N<:Real,D<:Integer} = encode(ld, convert(N, x))::D
+function encode(ld::LinearDiscretizer{N,D}, data::AbstractArray) where {N<:Real,D<:Integer}
     arr = [encode(ld, x) for x in data]
     reshape(arr, size(data))
 end
@@ -152,7 +152,7 @@ decode(ld::LinearDiscretizer{N,D}, d::D) where {N<:Integer,D<:Integer} = decode(
 decode(ld::LinearDiscretizer{N,D}, d::I, method::AbstractSampleMethod=SAMPLE_UNIFORM) where {N<:Real,D<:Integer,I<:Integer} =
     decode(ld, convert(D,d), method)
 
-function decode(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM) where {N,D<:Integer}
+function decode(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM) where {N<:Real,D<:Integer}
     arr = Vector{N}(undef, length(data))
     for (i,d) in enumerate(data)
         arr[i] = decode(ld, d)
@@ -162,18 +162,18 @@ end
 
 Base.max(ld::LinearDiscretizer) = ld.binedges[end]
 Base.min(ld::LinearDiscretizer) = ld.binedges[1]
-function Base.extrema(ld::LinearDiscretizer{N,D}) where {N,D}
+function Base.extrema(ld::LinearDiscretizer{N,D}) where {N<:Real,D<:Integer}
     lo  = ld.binedges[1]
     hi  = ld.binedges[end]
     return (lo, hi)
 end
-function Base.extrema(ld::LinearDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D}
+function Base.extrema(ld::LinearDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D<:Integer}
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
     return (lo, hi)
 end
-function Base.extrema(ld::LinearDiscretizer{N,D}, d::D) where {N<:Integer,D}
+function Base.extrema(ld::LinearDiscretizer{N,D}, d::D) where {N<:Integer,D<:Integer}
     ind = ld.d2i[d]
     lo  = ld.binedges[ind]
     hi  = ld.binedges[ind+1]
@@ -190,8 +190,8 @@ end
 
 nlabels(ld::LinearDiscretizer) = ld.nbins
 binedges(ld::LinearDiscretizer) = ld.binedges
-bincenters(ld::LinearDiscretizer{N,D}) where {N<:AbstractFloat,D} = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
-function bincenters(ld::LinearDiscretizer{N,D}) where {N<:Integer,D}
+bincenters(ld::LinearDiscretizer{N,D}) where {N<:AbstractFloat,D<:Integer} = (0.5*(ld.binedges[1:ld.nbins] + ld.binedges[2:end]))::Vector{Float64}
+function bincenters(ld::LinearDiscretizer{N,D}) where {N<:Integer,D<:Integer}
     retval = Vector{Float64}(undef, ld.nbins)
     for i = 1 : length(retval)-1
         retval[i] = 0.5(ld.binedges[i+1]-1 + ld.binedges[i])
@@ -199,5 +199,5 @@ function bincenters(ld::LinearDiscretizer{N,D}) where {N<:Integer,D}
     retval[end] = 0.5(ld.binedges[end] + ld.binedges[end-1])
     retval
 end
-binwidth(ld::LinearDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D} = ld.binedges[d+1] - ld.binedges[d]
-binwidths(ld::LinearDiscretizer{N,D}) where {N<:AbstractFloat,D} = ld.binedges[2:end] - ld.binedges[1:end-1]
+binwidth(ld::LinearDiscretizer{N,D}, d::D) where {N<:Real,D<:Integer} = ld.binedges[d+1] - ld.binedges[d]
+binwidths(ld::LinearDiscretizer{N,D}) where {N<:Real,D<:Integer} = ld.binedges[2:end] - ld.binedges[1:end-1]
