@@ -199,5 +199,5 @@ function bincenters(ld::LinearDiscretizer{N,D}) where {N<:Integer,D<:Integer}
     retval[end] = 0.5(ld.binedges[end] + ld.binedges[end-1])
     retval
 end
-binwidth(ld::LinearDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D<:Integer} = ld.binedges[d+1] - ld.binedges[d]
-binwidths(ld::LinearDiscretizer{N,D}) where {N<:AbstractFloat,D<:Integer} = ld.binedges[2:end] - ld.binedges[1:end-1]
+binwidth(ld::LinearDiscretizer{N,D}, d::D) where {N<:Real,D<:Integer} = ld.binedges[d+1] - ld.binedges[d]
+binwidths(ld::LinearDiscretizer{N,D}) where {N<:Real,D<:Integer} = ld.binedges[2:end] - ld.binedges[1:end-1]
