@@ -33,6 +33,7 @@ disc = datalineardiscretizer([0.0,1.0,2.0])
 
 @test nlabels(disc) == 3
 @test array_matches(bincenters(disc), [0.5,1.5])
+@test isapprox([bincenter(disc, i) for i in 1:nlabels(disc.lin)], bincenters(disc))
 @test isapprox(binwidth(disc, 1), 1.0)
 @test isapprox(binwidth(disc, 2), 1.0)
 @test array_matches(binwidths(disc), [1.0,1.0])

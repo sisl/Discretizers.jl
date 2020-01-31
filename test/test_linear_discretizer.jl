@@ -43,6 +43,8 @@ mat = decode(ld, [2 1; 1 2])
 
 @test nlabels(ld) == 2
 @test array_matches(bincenters(ld), [0.25,0.75], 1e-8)
+@test isapprox([bincenter(ld, i) for i in 1:nlabels(ld)], bincenters(ld))
+
 
 @test encoded_type(ld) == Int
 @test decoded_type(ld) == Float64
@@ -110,6 +112,7 @@ mat = decode(ld, [2 1; 1 2])
 
 @test nlabels(ld) == 2
 @test array_matches(bincenters(ld), [4.5,15], 1e-8)
+@test isapprox([bincenter(ld, i) for i in 1:nlabels(ld)], bincenters(ld))
 
 @test encoded_type(ld) == Int
 @test decoded_type(ld) == Int
