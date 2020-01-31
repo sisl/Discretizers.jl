@@ -1,4 +1,5 @@
 using DataStructures
+using SpecialFunctions # for logfactorial
 
 abstract type DiscretizeMODL <: DiscretizationAlgorithm end
 
@@ -39,13 +40,13 @@ function MODL_value2_oneintval(
     n = length(continuous_ij)
     J = length(class_uniq)
 
-    first_part = lfactorial(n+J-1) - lfactorial(J-1) - lfactorial(n)
-    second_part = lfactorial(n)
-    # Note(Yi-Chun): lfactorial(n) is log(n!)
+    first_part = logfactorial(n+J-1) - logfactorial(J-1) - logfactorial(n)
+    second_part = logfactorial(n)
+    # Note(Yi-Chun): logfactorial(n) is log(n!)
 
     for J_index = 1:J
             n_J = count(x->x==class_uniq[J_index],class_value_ij)
-            second_part = second_part - lfactorial(n_J)
+            second_part = second_part - logfactorial(n_J)
     end
 
     return first_part+second_part
@@ -101,7 +102,7 @@ function optimal_result(
     full_length_k_intval = copy(Disc_ijk_MODL_value[n,:])
 
     for l = 1:n
-        full_length_k_intval[l] += lfactorial(n+l-1) - lfactorial(l-1) - lfactorial(n)
+        full_length_k_intval[l] += logfactorial(n+l-1) - logfactorial(l-1) - logfactorial(n)
     end
 
     desired_intval_number = argmin(full_length_k_intval)
@@ -135,12 +136,12 @@ function merge_adj_intval(
     n_A = sum(A_distr)
     n_B = sum(B_distr)
 
-    Delta = lfactorial(n_A+n_B+J-1) + lfactorial(J-1) - lfactorial(n_A+J-1) - lfactorial(n_B+J-1)
+    Delta = logfactorial(n_A+n_B+J-1) + logfactorial(J-1) - logfactorial(n_A+J-1) - logfactorial(n_B+J-1)
 
     for j = 1:J
         n_A_J = A_distr[j]
         n_B_J = B_distr[j]
-        Delta = Delta - lfactorial(n_A_J+n_B_J) + lfactorial(n_A_J) + lfactorial(n_B_J)
+        Delta = Delta - logfactorial(n_A_J+n_B_J) + logfactorial(n_A_J) + logfactorial(n_B_J)
     end
     Delta
 end
@@ -167,7 +168,7 @@ function greedy_merge_index(
     adj_for_intval = Dict()
     # Note(Yi-Chun): This dictionary contains the two adjacent interval for interval i
 
-    MODL = log(n) + lfactorial(2n-1) - lfactorial(n-1) - lfactorial(n) + n*log(J-1)
+    MODL = log(n) + logfactorial(2n-1) - logfactorial(n-1) - logfactorial(n) + n*log(J-1)
     # Note(Yi-Chun): Intial MODL when each attribute is treated as a single bin
 
     for i = 1:n-1
@@ -375,10 +376,10 @@ function methods_split(continuous,class_value,distr,i,j,uniq_class,I)
         distr_A[something(findfirst(isequal(class_ij[n_A_end]), uniq_class),0)] += 1
         distr_B = distr_ij - distr_A
 
-        Del = lfactorial(n_A_end+J-1)+lfactorial(n-n_A_end+J-1)-lfactorial(n+J-1)-lfactorial(J-1)
+        Del = logfactorial(n_A_end+J-1)+logfactorial(n-n_A_end+J-1)-logfactorial(n+J-1)-logfactorial(J-1)
 
         for j = 1:J
-            Del += lfactorial(distr_A[j]+distr_B[j])-lfactorial(distr_A[j])-lfactorial(distr_B[j])
+            Del += logfactorial(distr_A[j]+distr_B[j])-logfactorial(distr_A[j])-logfactorial(distr_B[j])
         end
 
 
@@ -409,11 +410,11 @@ function methods_merge(
     J = length(B_distr)
     n_A = sum(A_distr)
     n_B = sum(B_distr)
-    Delta = lfactorial(n_A+n_B+J-1) + lfactorial(J-1) - lfactorial(n_A+J-1) - lfactorial(n_B+J-1)
+    Delta = logfactorial(n_A+n_B+J-1) + logfactorial(J-1) - logfactorial(n_A+J-1) - logfactorial(n_B+J-1)
     for j = 1:J
         n_A_J = A_distr[j]
         n_B_J = B_distr[j]
-        Delta = Delta - lfactorial(n_A_J+n_B_J) + lfactorial(n_A_J) + lfactorial(n_B_J)
+        Delta = Delta - logfactorial(n_A_J+n_B_J) + logfactorial(n_A_J) + logfactorial(n_B_J)
     end
     Delta += log((I-1)/(N+I-1))
     return Delta
@@ -515,7 +516,7 @@ function uncondi_greedy_merge_index(
     distr_in_intval = Dict()
     adj_for_intval = Dict()
 
-    MODL = log(n) + lfactorial(2n-1) - lfactorial(n-1) - lfactorial(n) + n*log(J-1)
+    MODL = log(n) + logfactorial(2n-1) - logfactorial(n-1) - logfactorial(n) + n*log(J-1)
 
     total_distrib = zeros(Int64,J)
 

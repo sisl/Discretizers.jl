@@ -28,8 +28,8 @@ ld = LinearDiscretizer([0.0,0.5,1.0])
 @test isapprox(decode(ld, 1, SAMPLE_BIN_CENTER), 0.25)
 @test isapprox(decode(ld, 2, SAMPLE_BIN_CENTER), 0.75)
 
-@test_throws KeyError decode(ld,  0)
-@test_throws KeyError decode(ld,  3)
+@test_throws BoundsError decode(ld,  0)
+@test_throws BoundsError decode(ld,  3)
 @test 0.5 ≤ decode(ld, 2 % UInt8) ≤ 1.0
 mat = decode(ld, [2 1; 1 2])
 @test 0.5 ≤ mat[1,1] ≤ 1.0
@@ -95,8 +95,8 @@ ld = LinearDiscretizer([0,10,20])
 @test decode(ld, 1, SAMPLE_BIN_CENTER) == 5
 @test decode(ld, 2, SAMPLE_BIN_CENTER) == 15
 
-@test_throws KeyError decode(ld,  0)
-@test_throws KeyError decode(ld,  3)
+@test_throws BoundsError decode(ld,  0)
+@test_throws BoundsError decode(ld,  3)
 @test 10 ≤ decode(ld, 2 % UInt8) ≤ 20
 mat = decode(ld, [2 1; 1 2])
 @test 10 ≤ mat[1,1] ≤ 20
