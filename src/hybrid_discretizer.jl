@@ -76,5 +76,6 @@ totalwidth(disc::HybridDiscretizer) = totalwidth(disc.lin)
 
 nlabels(disc::HybridDiscretizer) = disc.lin.nbins + nlabels(disc.cat)
 bincenters(disc::HybridDiscretizer) = bincenters(disc.lin)
+bincenter(disc::HybridDiscretizer, i) = bincenter(disc.lin, i)
 binwidth(disc::HybridDiscretizer{N,D}, d::D) where {N<:AbstractFloat,D} = binwidth(disc.lin, d)
 binwidths(disc::HybridDiscretizer{N,D}) where {N<:AbstractFloat,D} = binwidths(disc.lin)

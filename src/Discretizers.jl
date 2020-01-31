@@ -51,7 +51,8 @@ export
 
     # linear discretizer
     totalwidth,        # total width of set, max-mina
-    bincenters         # Vector{Float64} list of bin centers
+    bincenters,        # Vector{Float64} list of bin centers
+    bincenter          # Float64 center of a particular bin
 
 ### source files
 
