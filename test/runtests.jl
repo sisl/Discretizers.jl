@@ -35,5 +35,6 @@ include("test_common.jl")
 
 include("test_disc_uniformwidth.jl")
 include("test_disc_uniformcount.jl")
+include("test_disc_quantile.jl")
 include("test_disc_bayesianblocks.jl")
 include("test_disc_MODL.jl")

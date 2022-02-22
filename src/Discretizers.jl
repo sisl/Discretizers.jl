@@ -20,6 +20,7 @@ export
     # discretization algorithms
     DiscretizeUniformWidth,
     DiscretizeUniformCount,
+    DiscretizeQuantile,
     DiscretizeMODL_Optimal,
     DiscretizeMODL_Greedy,
     DiscretizeMODL_PostGreedy,
@@ -66,6 +67,7 @@ include("hybrid_discretizer.jl")
 
 include("disc_uniformwidth.jl")
 include("disc_uniformcount.jl")
+include("disc_quantile.jl")
 include("disc_MODL.jl")
 include("disc_bayesianblocks.jl")
 
