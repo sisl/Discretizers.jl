@@ -3,7 +3,7 @@ __precompile__(true)
 module Discretizers
 
 import Base: extrema
-import StatsBase: iqr, moment
+import StatsBase: iqr, moment, quantile
 import Statistics: std
 import SpecialFunctions: lfactorial
 
