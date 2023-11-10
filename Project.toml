@@ -1,7 +1,7 @@
 name = "Discretizers"
 uuid = "6e83dbb3-75ca-525b-8ae2-3751f0dd50b4"
 repo = "https://github.com/sisl/Discretizers.jl"
-version = "3.2.2"
+version = "3.2.3"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
@@ -12,7 +12,9 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 DataStructures = "0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19"
 SpecialFunctions = "0.6,0.7,0.8,0.9,1.0,1.1,1.2,2.0"
-StatsBase = "0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33"
+Statistics = "<0.0.1, 1"
+StatsBase = "0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33, 0.34"
+
 julia = "0.7,1"
 
 [extras]
