@@ -1,7 +1,7 @@
 name = "Discretizers"
 uuid = "6e83dbb3-75ca-525b-8ae2-3751f0dd50b4"
 repo = "https://github.com/sisl/Discretizers.jl"
-version = "3.2.3"
+version = "3.2.4"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
