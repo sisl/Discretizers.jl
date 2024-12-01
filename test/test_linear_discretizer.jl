@@ -140,3 +140,20 @@ ld = LinearDiscretizer([0,10,20], Int, force_outliers_to_closest=false)
 @test supports_encoding(ld, 16)
 @test !supports_encoding(ld, -1)
 @test !supports_encoding(ld, 21)
+
+let
+    # Ensure that linear discretizer propoagates the sampling method
+    binedges = [0, 0.5, 1]
+    lineardisc = LinearDiscretizer(binedges)
+
+    decode_1 = decode(lineardisc, 1, SAMPLE_BIN_CENTER) # 0.25
+    decode_2 = decode(lineardisc, 2, SAMPLE_BIN_CENTER) # 0.75
+    decode_12_uniform = decode(lineardisc, [1, 2], SAMPLE_UNIFORM)
+
+    @test !(decode_1 ≈ decode_12_uniform[1])
+    @test !(decode_2 ≈ decode_12_uniform[2])
+
+    decode_12_center = decode(lineardisc, [1, 2], SAMPLE_BIN_CENTER)
+    @test decode_1 ≈ decode_12_center[1]
+    @test decode_2 ≈ decode_12_center[2]
+end

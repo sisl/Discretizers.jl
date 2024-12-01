@@ -121,10 +121,10 @@ decode(ld::LinearDiscretizer{N,D}, d::D) where {N<:Integer,D<:Integer} = decode(
 decode(ld::LinearDiscretizer{N,D}, d::I, method::AbstractSampleMethod=SAMPLE_UNIFORM) where {N<:Real,D<:Integer,I<:Integer} =
     decode(ld, convert(D,d), method)
 
-function decode(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, ::AbstractSampleMethod=SAMPLE_UNIFORM) where {N<:Real,D<:Integer}
+function decode(ld::LinearDiscretizer{N,D}, data::AbstractArray{D}, method::AbstractSampleMethod=SAMPLE_UNIFORM) where {N<:Real,D<:Integer}
     arr = Vector{N}(undef, length(data))
     for (i,d) in enumerate(data)
-        arr[i] = decode(ld, d)
+        arr[i] = decode(ld, d, method)
     end
     reshape(arr, size(data))
 end
