@@ -5,4 +5,4 @@
 
 This package supports discretization methods and discretization mappings for turning continuous data to and from discrete data.
 
-Please read the [documentation](http://nbviewer.ipython.org/github/sisl/Discretizers.jl/blob/master/doc/Discretizers.ipynb).
+Please read the [documentation](https://github.com/sisl/Discretizers.jl/blob/master/doc/Discretizers.ipynb).
